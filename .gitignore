@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project-specific
+node_modules/
+.vercel/
+.vercel-tmp/
+phase_1_mvp/data/raw_pages/
+phase_1_mvp/data/vector_store/
+*.pyc
+nul
+page_verification.png
+
+# Keep data but not large binary files
+# phase_1_mvp/data/chunks/
+# phase_1_mvp/data/embeddings/

@@ -1,0 +1,94 @@
+{
+  "source_url": "https://groww.in/mutual-funds/motilal-oswal-nifty-500-momentum-50-index-fund-direct-growth",
+  "scheme_name": "Motilal Oswal Nifty 500 Momentum 50 Index Fund Direct Growth",
+  "crawl_date": "2026-04-17T14:18:18.903844+00:00",
+  "page_hash": "cc33072453562a2bc07d2c3c9521450311fe0b2abe183e31b29ca413505088fc",
+  "segmented_at": "2026-04-17T14:18:21.395861+00:00",
+  "segment_count": 11,
+  "block_summary": {
+    "header_block": 1,
+    "facts_block": 2,
+    "other_block": 2,
+    "fees_block": 3,
+    "process_block": 3
+  },
+  "segments": [
+    {
+      "block_type": "header_block",
+      "text": "Motilal Oswal Nifty 500 Momentum 50 Index Fund Direct Growth",
+      "line_count": 1,
+      "char_count": 60,
+      "content_hash": "33b225b0133d27de65bcf93d969c5962e0dfd602a72d382c87a7aad22e79bf5d"
+    },
+    {
+      "block_type": "facts_block",
+      "text": "Historic returns\n3 months\n\u20b915,000\n\u20b915,471\n+ 3.14 %\n6 months\n\u20b930,000\n\u20b930,056\n+ 0.19 %\n1 year\n\u20b960,000\n\u20b959,943\n-0.10 %",
+      "line_count": 13,
+      "char_count": 115,
+      "content_hash": "6d706651384beff1c78a854ab487ce40399701edab7e4edb07a91bc299e3221e"
+    },
+    {
+      "block_type": "other_block",
+      "text": "Holdings ( 50 )\nEicher Motors Ltd.\nAutomobile\nEquity\n5.02%\nShriram Finance Ltd\nFinancial\n5.00%\nHindalco Industries Ltd.\nMetals & Mining\n4.99%\nBharti Airtel Ltd.\nCommunication\n4.79%\nMahindra & Mahindra Ltd.\n4.61%\nBajaj Finance Ltd.\n4.53%\nAsian Paints Ltd.\nChemicals\n4.20%\nMaruti Suzuki India Ltd.\n4.19%\nTVS Motor Company Ltd.\n3.71%\nBSE Ltd.\nServices\n3.62%\nHero Motocorp Ltd.\n3.39%\nMulti Commodity Exchange Of India Ltd.\n3.07%\nInterglobe Aviation Ltd.\n3.02%\nCummins India Ltd.\nCapital Goods\n2.67%\nThe Federal Bank Ltd.\n2.66%\nMuthoot Finance Ltd.\n2.61%\nLaurus Labs Ltd.\nHealthcare\n2.57%\nAU Small Finance Bank Ltd.\n2.52%\nCanara Bank\n1.98%\nL&T Finance Ltd.\n1.82%\nGE Vernova T&D India Ltd\n1.81%\nCholamandalam Investment and Finance Company Ltd.\n1.75%\nOne97 Communications Ltd.\n1.74%\nMax Financial Services Ltd.\n1.73%\nFortis Healthcare Ltd.\n1.71%\nFSN E-Commerce Ventures Ltd.\n1.62%\nIndian Bank\n1.61%\nAditya Birla Capital Ltd.\n1.55%\nGMR Airports Ltd.\nConstruction\n1.30%\nUPL Ltd.\n1.29%\nGlenmark Pharmaceuticals Ltd.\n1.26%\nNavin Fluorine International Ltd.\n1.15%\nKarur Vysya Bank Ltd.\n1.11%\nHitachi Energy India Ltd.\n1.07%\nRBL Bank Ltd.\n1.06%\nMahindra & Mahindra Financial Services Ltd.\n0.94%\nCity Union Bank Ltd.\n0.85%\nRadico Khaitan Ltd.\nConsumer Staples\n0.74%\nManappuram Finance Ltd.\n0.66%\nAnand Rathi Wealth Ltd.\nAster DM Healthcare Ltd.\n0.54%\nForce Motors Ltd.\n0.53%\nAsahi India Glass Ltd.\n0.42%\nNarayana Hrudayalaya Ltd.\n0.38%\nIIFL Finance Ltd.\n0.36%\nPTC Industries Ltd.\n0.30%\nHBL Engineering Ltd.\n0.25%\nSyrma SGS Technology Ltd.\n0.23%\nGujarat Mineral Development Corporation Ltd.\nEnergy\n0.19%\nChoice International Ltd.\n0.18%",
+      "line_count": 112,
+      "char_count": 1621,
+      "content_hash": "50c0aa59492342d38629dba0df7d08737b9ecbf6ef9f89f701b994abef002934"
+    },
+    {
+      "block_type": "fees_block",
+      "text": "Minimum investments",
+      "line_count": 1,
+      "char_count": 19,
+      "content_hash": "efb794e046ad2ec4c175eb6057c0e3e4d45272e880609f4425b90e4c6f83ce9e"
+    },
+    {
+      "block_type": "facts_block",
+      "text": "Average of the yearly returns of a mutual fund over a given period.\nThe total return of a mutual fund over a given period.\nReturns and rankings\nFund returns\n-2.1%\n-4.8%\n+10.2%\n-21.3%\nCategory average ( Equity Flexi Cap )\n+2.2%\nRank ( Equity Flexi Cap )\nA fee payable to a mutual fund house for managing your mutual fund investments. It is the total percentage of a company's fund assets used for administrative, management, advertising, and other expenses.",
+      "line_count": 12,
+      "char_count": 456,
+      "content_hash": "51ddbb4c8afa2d2f9d0eea86ec410a1ab59d03b0a515dedc11abde025a420e08"
+    },
+    {
+      "block_type": "process_block",
+      "text": "A percentage of your capital gains payable to the government upon exiting your mutual fund investments. Taxation is categorized as long-term capital gains (LTCG) and short-term capital gains (STCG) depending on your holding period and the type of fund.",
+      "line_count": 1,
+      "char_count": 252,
+      "content_hash": "924d6b579e5259ea6837055a02b4d7df030a8c27aaf5fc98756943a17dcc987d"
+    },
+    {
+      "block_type": "fees_block",
+      "text": "A fee payable to a mutual fund house for exiting a fund (fully or partially) before the completion of a specified period from the date of investment.",
+      "line_count": 1,
+      "char_count": 149,
+      "content_hash": "88903b72337c5a22444b4013a1c581781cdf26c5d2f18a75bbf1d1cea81e6479"
+    },
+    {
+      "block_type": "process_block",
+      "text": "A form of tax payable for the purchase or sale of an asset or security.",
+      "line_count": 1,
+      "char_count": 71,
+      "content_hash": "166545d531b120bfb6a2c876bd972aa42dfe967316a96a1706bc216f38284096"
+    },
+    {
+      "block_type": "fees_block",
+      "text": "Exit Load\nExit load, stamp duty and tax\nStamp duty on investment: 0.005% (from July 1st, 2020)",
+      "line_count": 3,
+      "char_count": 94,
+      "content_hash": "e4898354ef407ec723851815958b9ad41e1dfdd239d99b957865cee870249686"
+    },
+    {
+      "block_type": "process_block",
+      "text": "Tax implication",
+      "line_count": 1,
+      "char_count": 15,
+      "content_hash": "920c0bed1fe99a75a55289011e50b2813e3333c6102e101f431beff5a7045378"
+    },
+    {
+      "block_type": "other_block",
+      "text": "Compare similar funds\nFund Size(Cr)\nITI Flexi Cap Fund Direct Growth\n+11.66%\n+22.27%\n1,133.99\nInvesco India Flexi Cap Fund Direct Growth\n+6.39%\n+21.21%\n4,202.43\nHDFC Flexi Cap Direct Plan Growth\n+7.25%\n+20.89%\n91,334.91\nParag Parikh Flexi Cap Fund Direct Growth\n+7.27%\n+18.93%\n1,28,966.48\nFranklin India Flexi Cap Fund Direct Growth\n+4.04%\n+17.91%\n17,535.63\nFund management\nSPM Swapnil P Mayekar Sep 2024 - Present View details\nRS Rakesh Shetty Sep 2024 - Present View details\nDM Dishant Mehta Oct 2024 - Present View details\nAbout Motilal Oswal Nifty 500 Momentum 50 Index Fund Direct Growth\nInvestment Objective\nFund house",
+      "line_count": 29,
+      "char_count": 624,
+      "content_hash": "9549b3901500522422f51d3806056a5b1b2141b72a41c4844979b321107ceb88"
+    }
+  ]
+}

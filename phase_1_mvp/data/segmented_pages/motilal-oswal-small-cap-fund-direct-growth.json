@@ -1,0 +1,94 @@
+{
+  "source_url": "https://groww.in/mutual-funds/motilal-oswal-small-cap-fund-direct-growth",
+  "scheme_name": "Motilal Oswal Small Cap Fund Direct Growth",
+  "crawl_date": "2026-04-17T14:18:18.903844+00:00",
+  "page_hash": "a7c134bfee63be7520a145e16beab3101e86aed4ffd94c8ad7362a6ab8bf695e",
+  "segmented_at": "2026-04-17T14:18:21.399089+00:00",
+  "segment_count": 11,
+  "block_summary": {
+    "header_block": 1,
+    "facts_block": 2,
+    "other_block": 2,
+    "fees_block": 3,
+    "process_block": 3
+  },
+  "segments": [
+    {
+      "block_type": "header_block",
+      "text": "Motilal Oswal Small Cap Fund Direct Growth",
+      "line_count": 1,
+      "char_count": 42,
+      "content_hash": "4ab5f28cf1ca89e7b0ed0d5ae3c4cd4c786e701cdf4499b776763852a890e8b2"
+    },
+    {
+      "block_type": "facts_block",
+      "text": "Historic returns\n3 months\n\u20b915,000\n\u20b914,805\n-1.30 %\n6 months\n\u20b930,000\n\u20b928,273\n-5.76 %\n1 year\n\u20b960,000\n\u20b956,577\n-5.71 %",
+      "line_count": 13,
+      "char_count": 113,
+      "content_hash": "1ca3097a571fbec63a19a1245b9d8ca10dc4f9e92df7396ea2b1efc1043f6b45"
+    },
+    {
+      "block_type": "other_block",
+      "text": "Holdings ( 58 )\nCCL Products (India) Ltd.\nConsumer Staples\nEquity\n4.60%\nKarur Vysya Bank Ltd.\nFinancial\n4.30%\nRubicon Research Ltd.\nHealthcare\n3.78%\nDr. Agarwal's Health Care Ltd.\n3.31%\nVA Tech Wabag Ltd.\nCapital Goods\n3.29%\nAditya Infotech Ltd.\nCommunication\n3.24%\nV2 Retail Ltd.\nServices\n2.89%\nCampus Activewear Ltd.\n2.87%\nShaily Engineering Plastics Ltd.\nChemicals\n2.62%\nVijaya Diagnostic Centre Ltd.\n2.56%\nPricol Ltd.\nAutomobile\n2.53%\nAditya Vision Ltd.\n2.45%\nRainbow Children's Medicare Ltd.\n2.31%\nApar Industries Ltd.\n2.27%\nAsahi India Glass Ltd.\nConstruction\n2.22%\nSky Gold And Diamonds Ltd.\nConsumer Discretionary\n2.19%\nV-Mart Retail Ltd.\n2.16%\nGabriel India Ltd.\n1.93%\nJM Financial Ltd.\n1.92%\nSyrma SGS Technology Ltd.\n1.75%\nVarroc Engineering Ltd.\n1.74%\nPG Electroplast Ltd.\nFive-Star Business Finance Ltd.\n1.69%\nGE Vernova T&D India Ltd\n1.68%\nCity Union Bank Ltd.\n1.57%\nKei Industries Ltd.\n1.52%\nDCB Bank Ltd.\n1.49%\nAegis Vopak Terminals Ltd.\nEnergy\n1.48%\nChalet Hotels Ltd.\nBharat Dynamics Ltd.\neClerx Services Ltd.\nMulti Commodity Exchange Of India Ltd.\n1.46%\nThirumalai Chemicals Ltd.\n1.42%\nTriveni Turbine Ltd.\n1.32%\nCentral Depository Services (India) Ltd.\n1.28%\nBirlasoft Ltd.\nTechnology\nCholamandalam Financial Holdings Ltd.\n1.24%\nGokaldas Exports Ltd.\nTextiles\n1.23%\nOnesource Specialty Pharma Ltd.\n1.13%\nMTAR Technologies Ltd.\n1.11%\nDeepak Fertilisers And Petrochemicals Corporation Ltd.\n1.08%\nAditya Birla Real Estate Ltd.\nSonata Software Ltd.\n1.01%\nJain Resource Recycling Ltd.\nMetals & Mining\n0.99%\nP N Gadgil Jewellers Ltd.\n0.98%\nWeWork India Management Ltd.\n0.83%\nSagility Ltd.\n0.81%\nKEC International Ltd.\n0.80%\nTransformers And Rectifiers India Ltd.\n0.68%\nRossari Biotech Ltd.\n0.63%\nHexaware Technologies Ltd.\n0.59%\nRadico Khaitan Ltd.\n0.55%\nStyrenix Performance Materials Ltd.\n0.51%\nSupreme Industries Ltd.\n0.44%\nNetweb Technologies India Ltd.\n0.30%\nAllied Blenders And Distillers Ltd.\n0.09%\nAvalon Technologies Ltd.\nAmber Enterprises India Ltd.\n0.08%",
+      "line_count": 125,
+      "char_count": 1979,
+      "content_hash": "50e151217726e991b5a078dc5f0fc0ad09f9a3766ff3538eaaad041350145839"
+    },
+    {
+      "block_type": "fees_block",
+      "text": "Minimum investments",
+      "line_count": 1,
+      "char_count": 19,
+      "content_hash": "efb794e046ad2ec4c175eb6057c0e3e4d45272e880609f4425b90e4c6f83ce9e"
+    },
+    {
+      "block_type": "facts_block",
+      "text": "Average of the yearly returns of a mutual fund over a given period.\nThe total return of a mutual fund over a given period.\nReturns and rankings\nFund returns\n-0.2%\n-5.3%\n+10.8%\n+37.8%\nCategory average ( Equity Small Cap )\n-6.3%\nRank ( Equity Small Cap )\nA fee payable to a mutual fund house for managing your mutual fund investments. It is the total percentage of a company's fund assets used for administrative, management, advertising, and other expenses.",
+      "line_count": 12,
+      "char_count": 456,
+      "content_hash": "fdd25d9565196d0c38d0cbacce6c58383d724d69da5110b8e280f0e192530f8d"
+    },
+    {
+      "block_type": "process_block",
+      "text": "A percentage of your capital gains payable to the government upon exiting your mutual fund investments. Taxation is categorized as long-term capital gains (LTCG) and short-term capital gains (STCG) depending on your holding period and the type of fund.",
+      "line_count": 1,
+      "char_count": 252,
+      "content_hash": "924d6b579e5259ea6837055a02b4d7df030a8c27aaf5fc98756943a17dcc987d"
+    },
+    {
+      "block_type": "fees_block",
+      "text": "A fee payable to a mutual fund house for exiting a fund (fully or partially) before the completion of a specified period from the date of investment.",
+      "line_count": 1,
+      "char_count": 149,
+      "content_hash": "88903b72337c5a22444b4013a1c581781cdf26c5d2f18a75bbf1d1cea81e6479"
+    },
+    {
+      "block_type": "process_block",
+      "text": "A form of tax payable for the purchase or sale of an asset or security.",
+      "line_count": 1,
+      "char_count": 71,
+      "content_hash": "166545d531b120bfb6a2c876bd972aa42dfe967316a96a1706bc216f38284096"
+    },
+    {
+      "block_type": "fees_block",
+      "text": "Exit Load\nExit load, stamp duty and tax\nStamp duty on investment: 0.005% (from July 1st, 2020)",
+      "line_count": 3,
+      "char_count": 94,
+      "content_hash": "e4898354ef407ec723851815958b9ad41e1dfdd239d99b957865cee870249686"
+    },
+    {
+      "block_type": "process_block",
+      "text": "Tax implication",
+      "line_count": 1,
+      "char_count": 15,
+      "content_hash": "920c0bed1fe99a75a55289011e50b2813e3333c6102e101f431beff5a7045378"
+    },
+    {
+      "block_type": "other_block",
+      "text": "Compare similar funds\nFund Size(Cr)\nBandhan Small Cap Fund Direct Growth\n+12.10%\n+31.87%\n20,129.67\nInvesco India Smallcap Fund Direct Growth\n+11.35%\n+25.74%\n9,207.58\nNippon India Small Cap Fund Direct Growth\n+8.65%\n+21.71%\n61,808.85\nQuant Small Cap Fund Direct Plan Growth\n+6.00%\n+20.85%\n25,820.99\nAxis Small Cap Fund Direct Growth\n+7.06%\n+18.69%\n23,918.65\nFund management\nSPM Swapnil P Mayekar Nov 2025 - Present View details\nAK Ajay Khandelwal Dec 2023 - Present View details\nRS Rakesh Shetty Dec 2023 - Present View details\nBS Bhalchandra Shinde Jan 2026 - Present View details\nAbout Motilal Oswal Small Cap Fund Direct Growth\nInvestment Objective\nFund house",
+      "line_count": 30,
+      "char_count": 661,
+      "content_hash": "624c4d2209ef9dcb43ad9b315485425f29c7088c058685046ee9e49e1a24f04e"
+    }
+  ]
+}

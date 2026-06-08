@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mutual Fund RAG Chatbot</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Mutual Fund Facts Chatbot</h1>
+      <p class="subtitle">Ask me factual questions about mutual funds. Facts-only. No investment advice.</p>
+    </header>
+
+    <div class="examples">
+      <p class="examples-label">Try asking:</p>
+      <button class="example-btn" onclick="useExample(this)">What is the expense ratio of Motilal Oswal Small Cap Fund?</button>
+      <button class="example-btn" onclick="useExample(this)">What is the minimum SIP amount?</button>
+      <button class="example-btn" onclick="useExample(this)">What is the exit load for Motilal Oswal Defence Index Fund?</button>
+    </div>
+
+    <div id="chat-area" class="chat-area"></div>
+
+    <form id="chat-form" class="input-area" onsubmit="sendMessage(event)">
+      <input
+        type="text"
+        id="query-input"
+        placeholder="Ask a factual question about mutual funds..."
+        autocomplete="off"
+        required
+      >
+      <button type="submit" id="send-btn">Send</button>
+    </form>
+  </div>
+
+  <script>
+    const chatArea = document.getElementById('chat-area');
+    const queryInput = document.getElementById('query-input');
+    const sendBtn = document.getElementById('send-btn');
+
+    function useExample(btn) {
+      queryInput.value = btn.textContent;
+      queryInput.focus();
+    }
+
+    function appendMessage(role, content) {
+      const msg = document.createElement('div');
+      msg.className = 'message ' + role;
+      msg.innerHTML = content;
+      chatArea.appendChild(msg);
+      chatArea.scrollTop = chatArea.scrollHeight;
+    }
+
+    function escapeHtml(text) {
+      const d = document.createElement('div');
+      d.textContent = text;
+      return d.innerHTML;
+    }
+
+    async function sendMessage(e) {
+      e.preventDefault();
+      const query = queryInput.value.trim();
+      if (!query) return;
+
+      appendMessage('user', escapeHtml(query));
+      queryInput.value = '';
+      sendBtn.disabled = true;
+
+      // Show loading
+      const loadingId = 'loading-' + Date.now();
+      appendMessage('bot', '<div id="' + loadingId + '" class="loading">Thinking...</div>');
+
+      try {
+        const res = await fetch('/chat', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({query: query}),
+        });
+
+        const data = await res.json();
+
+        // Remove loading indicator
+        const loadingEl = document.getElementById(loadingId);
+        if (loadingEl) loadingEl.parentElement.remove();
+
+        if (data.error) {
+          appendMessage('bot', '<div class="error">' + escapeHtml(data.error) + '</div>');
+          return;
+        }
+
+        let html = '<div class="answer">' + escapeHtml(data.answer) + '</div>';
+
+        if (data.source_link) {
+          html += '<div class="source">Source: <a href="' + escapeHtml(data.source_link) +
+                  '" target="_blank" rel="noopener">' + escapeHtml(data.source_link) + '</a></div>';
+        }
+
+        if (data.last_updated_from_sources) {
+          html += '<div class="last-updated">Last updated from sources: ' +
+                  escapeHtml(data.last_updated_from_sources) + '</div>';
+        }
+
+        html += '<div class="response-type badge-' + escapeHtml(data.response_type) + '">' +
+                escapeHtml(data.response_type) + '</div>';
+
+        appendMessage('bot', html);
+
+      } catch (err) {
+        const loadingEl = document.getElementById(loadingId);
+        if (loadingEl) loadingEl.parentElement.remove();
+        appendMessage('bot', '<div class="error">Error: ' + escapeHtml(err.message) + '</div>');
+      } finally {
+        sendBtn.disabled = false;
+        queryInput.focus();
+      }
+    }
+  </script>
+</body>
+</html>

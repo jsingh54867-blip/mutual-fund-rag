@@ -1,0 +1,368 @@
+Detailed Architecture: Chunking and Embedding Pipeline
+
+1) Purpose
+
+Define a robust, repeatable, and incremental chunking/embedding architecture for the in-scope Groww scheme links so retrieval remains factual, precise, and citation-safe.
+
+Primary goals:
+- Preserve factual fields accurately (expense_ratio, exit_load, min_sip, benchmark, etc.)
+- Produce semantically coherent chunks for high retrieval quality
+- Support incremental refresh (reprocess only changed pages)
+- Maintain strict traceability from chunk to source URL for one-link citation enforcement
+
+2) Inputs and Outputs
+
+2.1 Inputs
+- Canonical URL list (7 in-scope Groww links)
+- Parsed/normalized page text from scraping service
+- Source metadata:
+  - source_url
+  - crawl_date
+  - optional extracted page-level last_updated_text
+
+2.2 Outputs
+- Versioned chunk dataset
+- Embedding vectors for each active chunk (1024-dim, L2-normalized)
+- Vector index (ChromaDB persistent collection, cosine similarity)
+- Chunk-to-source mapping table (chunk_map.json)
+- Pipeline run report (counts, changed pages, failures)
+
+3) Pipeline Stages
+
+Raw HTML
+  -> Clean text blocks
+  -> Structural segmentation         [Stage A]
+  -> Field-aware chunking            [Stage B]
+  -> Chunk metadata enrichment       [Stage C]
+  -> Chunk hashing/versioning        [Stage D]
+  -> Embedding generation            [Stage E]
+  -> Vector upsert + deactivation    [Stage F]
+  -> Retrieval-ready index
+
+4) Stage A: Structural Segmentation
+
+Before chunking, split page text into semantic blocks:
+- header_block: scheme name/category snapshot
+- facts_block: expense ratio, AUM, NAV-like factual fields
+- fees_block: exit load, minimum investment/SIP
+- risk_benchmark_block: riskometer, benchmark
+- process_block: statement/tax/capital gains workflow references (if present)
+- other_block: residual useful content
+
+Segmentation rules:
+- Use heading-based boundaries where possible.
+- Preserve bullet/table row adjacency so label-value pairs stay together.
+- Drop repetitive boilerplate text (footer/legal nav repeats).
+
+Rationale:
+- Prevent splitting fact label and value across unrelated chunks.
+
+5) Stage B: Field-Aware Chunking
+
+5.1 Chunk Unit Strategy
+- Preferred unit: semantic paragraph/table-group, not fixed length first.
+- Fallback to length-based split only when a unit exceeds threshold.
+
+5.2 Chunk Size Policy
+- Target: 650 characters
+- Min: 350 characters (guideline, not hard-enforced)
+- Max hard cap: 1000 characters
+- Overlap: 100 characters
+
+Why:
+- Smaller chunks improve precision.
+- Moderate overlap protects facts near boundaries.
+
+5.3 Rules for Financial Facts
+- Keep label + value + qualifier in same chunk whenever possible.
+  Example: "Exit load: 1% if redeemed within 365 days"
+- Do not split numeric tokens from units (%, days, INR).
+- If a field appears in multiple sections, retain both chunks but set metadata priority.
+
+5.4 Table/Key-Value Handling
+- Convert table rows to normalized lines:
+  Field: Value (Context)
+- Group related rows into the same chunk up to max size.
+- If table is long, split by logical subgroups, not arbitrary row count.
+
+6) Stage C: Metadata Enrichment
+
+Attach rich metadata to every chunk:
+- chunk_id (stable UUID v5, deterministic from source_url + text)
+- source_url
+- source_domain = groww.in
+- document_type = scheme_page_html
+- scheme_name
+- field_type (one primary + optional secondary list)
+- field_types (all matched labels)
+- section_name
+- crawl_date
+- last_updated_text (if available)
+- chunk_version
+- content_hash
+- is_active (boolean)
+- char_count
+
+Field type classification:
+- Rule-based mapping from section labels/keywords (checked in priority order):
+  - expense ratio -> expense_ratio
+  - exit load -> exit_load
+  - minimum + sip -> min_sip
+  - riskometer -> riskometer
+  - benchmark -> benchmark
+  - lock-in -> lock_in
+  - statement/tax/capital gains -> statement_process
+
+7) Stage D: Versioning and Change Detection
+
+Versioning model:
+- Compute page_hash from normalized full page text.
+- Compute content_hash from normalized chunk text.
+
+Incremental behavior:
+- If page_hash unchanged: skip re-chunking and re-embedding.
+- If changed:
+  - Regenerate chunks for that page.
+  - Compare new content_hash values with active version.
+  - Upsert new/changed chunks only.
+  - Mark removed old chunks as is_active = false.
+
+Benefits:
+- Lower embedding cost (local model is fast; still avoids redundant work)
+- Faster daily refresh
+- Clean rollback and auditability
+
+8) Stage E: Embedding Generation
+
+8.1 Embedding Model
+
+Selected model : BAAI/bge-large-en-v1.5
+Library        : sentence-transformers (local inference, no API key required)
+Dimension      : 1024
+Normalization  : L2-normalize all vectors (enables cosine similarity via dot product)
+Instruction    : none for document chunks; queries prepend
+                 "Represent this question for searching relevant passages: {query}"
+
+Rationale for BAAI/bge-large-en-v1.5:
+- Top-tier MTEB retrieval benchmark performance for English text
+- 1024-dim dense vectors: high discriminability for short factual passages
+- Strong numeric-token handling (%, INR amounts, day counts) critical for fund data
+- Fully local — zero API cost, no rate limit, no key rotation needed
+- Deterministic: identical text always produces identical vector
+- Model version pinned in config (EMBED_MODEL); full corpus re-embedded only on upgrade
+
+Model policy:
+- Keep one production model version pinned in config.py: EMBED_MODEL = "BAAI/bge-large-en-v1.5"
+- Only re-embed full corpus when EMBED_MODEL value changes.
+
+8.2 Embedding Preprocessing
+- Normalize whitespace (handled automatically by sentence-transformers tokenizer)
+- Preserve punctuation that changes meaning (%, /, -)
+- Do not pre-lowercase — the model's WordPiece tokenizer handles casing
+- Keep original text separately in chunk record for answer grounding
+
+8.3 Embedding Batch Strategy
+- Batch size: 32 (balances RAM and throughput; ~85 total chunks fits in one pass)
+- Retry failed items with exponential backoff
+- Persist embed_state.json after each batch: maps chunk_id -> content_hash
+- Incremental skip: if content_hash matches cached record, reuse stored vector
+
+8.4 Embedding Record Schema (data/embeddings/{fund_slug}.jsonl, one record per line)
+- chunk_id
+- source_url
+- scheme_name
+- section_name
+- field_type
+- text (original, unmodified)
+- embedding_vector (list[float], len=1024)
+- embedding_model = "BAAI/bge-large-en-v1.5"
+- embedding_dim = 1024
+- embedded_at (ISO-8601 UTC timestamp)
+- content_hash (hex SHA-256 of chunk text — used for incremental skip logic)
+
+9) Stage F: Vector Index Upsert
+
+9.1 Vector Store Selection
+
+Selected store : Chroma Cloud (https://www.trychroma.com) — fully managed, hosted
+Client         : chromadb.CloudClient(tenant, database, api_key)
+Host           : api.trychroma.com  (HTTPS, port 443)
+Collection     : "mutual_fund_chunks"  (single collection for all 7 funds)
+Distance       : cosine
+
+Rationale:
+- Fully managed cloud: no local index files, no disk quota concerns, accessible from any environment
+- CloudClient handles auth, TLS, and connection pooling — minimal config surface
+- Same ChromaDB Python API as local client: identical upsert/query interface
+- Native metadata filtering: where= clauses on scheme_name, field_type, section_name, crawl_date
+- Idempotent upsert by chunk_id: re-running Stage F on unchanged chunks is a no-op
+- Stores text, embedding vector, and metadata together — one query call returns everything the retriever needs
+- Cosine distance metric aligns with L2-normalised bge-large vectors
+
+Required environment secrets (stored in Replit Secrets, never hardcoded):
+- CHROMA_API_KEY  : API key from Chroma Cloud console (https://app.trychroma.com)
+- CHROMA_TENANT   : tenant ID shown in Chroma Cloud console
+- CHROMA_DATABASE : database name created in Chroma Cloud console
+
+9.2 Chroma Cloud Document Schema (one document per chunk)
+- id          : chunk_id (UUID v5 string — stable across runs, used for upsert)
+- embedding   : list[float] len=1024, L2-normalised bge-large-en-v1.5 vector
+- document    : chunk text (for context assembly and answer grounding)
+- metadata    :
+    source_url       : str
+    scheme_name      : str
+    section_name     : str  (e.g. "fees_block")
+    field_type       : str  (e.g. "expense_ratio")
+    crawl_date       : str  (ISO date)
+    content_hash     : str  (hex SHA-256, for change detection)
+    embedding_model  : str  ("BAAI/bge-large-en-v1.5")
+    embedded_at      : str  (ISO-8601 UTC)
+
+9.3 Index Write Strategy
+- Instantiate CloudClient using CHROMA_API_KEY, CHROMA_TENANT, CHROMA_DATABASE from env.
+- Get or create collection "mutual_fund_chunks" with cosine distance.
+- For each changed slug (from Stage E): read its embeddings JSONL and upsert to cloud collection.
+- Upsert is idempotent: same chunk_id with same content is overwritten in-place.
+- Run 3-probe retrieval sanity check (expense ratio / min SIP / exit load) after upsert.
+- On connection failure: log error, retain previous cloud data, surface failure to caller.
+
+Upsert constraints:
+- Only active chunks (is_active = true) are upserted.
+- chunk_id is the stable document ID — provides citation traceability chunk -> source_url.
+- Metadata fields available as cloud query-time filters: scheme_name, field_type.
+
+10) Retrieval Alignment Requirements
+
+Chunking/embedding must support downstream retriever behavior:
+- Metadata filter first (scheme_name, then field_type)
+- Similarity search second (ChromaDB cosine similarity with L2-normalized bge-large vectors)
+- Optional re-rank on numeric/entity overlap
+
+Query-time instruction:
+- Prefix user query with "Represent this question for searching relevant passages: {query}"
+  before encoding with BAAI/bge-large-en-v1.5 for retrieval.
+
+Quality rule:
+- For top factual queries, top-3 retrieved chunks should contain exact field answer in at least one chunk.
+
+11) Quality Gates
+
+Run quality checks after each scheduled pipeline execution:
+
+Chunk integrity checks:
+- No empty chunks
+- No duplicate active chunk IDs
+- No missing source_url or scheme_name
+
+Embedding checks:
+- Vector dimension = 1024 for every record
+- No NaN/inf values
+- Embedding count matches active chunk count
+
+Retrieval smoke set:
+- Fixed benchmark queries (expense ratio, exit load, min SIP, benchmark, riskometer)
+- Ensure at least one expected source chunk appears in top-k
+
+Citation traceability:
+- Every retrievable chunk maps to exactly one valid in-scope URL
+
+12) Failure and Recovery
+
+Failure categories:
+- Scrape parse failure
+- Chunking transform failure
+- Embedding model load failure
+- Index validation failure
+
+Recovery strategy:
+- Fail closed (keep previous active index)
+- Emit run status and failed URL/chunk IDs
+- Retry once for transient failures
+- Manual re-run command for targeted URLs
+
+13) Operational Integration with GitHub Actions
+
+Daily workflow (9:20 schedule) invokes:
+- python -m ingestion.run_ingestion           (scrape + segment + chunk)
+- python -m ingestion.run_embedding           (Stage E: embed changed chunks)
+- python -m ingestion.run_index_upsert        (Stage F: upsert to ChromaDB collection)
+- python -m ingestion.run_quality_checks      (validate index + smoke retrieval)
+
+If all checks pass:
+- Publish/swap active index artifacts
+
+If any check fails:
+- Do not swap index
+- Mark workflow failed and notify
+
+14) Recommended File/Module Layout
+
+ingestion/
+  scraping_service.py
+  segmenter.py
+  chunker.py
+  field_classifier.py
+  schemas.py
+  embed_pipeline.py        <- Stage E: BAAI/bge-large-en-v1.5 inference
+  index_upsert.py          <- Stage F: ChromaDB collection upsert + persist
+  run_ingestion.py
+  run_segmentation.py
+  run_chunking.py
+  run_embedding.py
+  run_index_upsert.py
+  run_quality_checks.py
+
+data/
+  segmented_pages/         <- Stage A output
+  chunks/                  <- Stage B+C output (JSONL per fund)
+  embeddings/              <- Stage E output (JSONL per fund with vectors)
+  vector_store/
+    chroma/                <- Stage F: ChromaDB persistent directory
+
+15) Pseudocode (Execution Flow)
+
+for url in SOURCE_URLS:
+    page = scrape(url)
+    norm = normalize(page)
+    if page_hash_unchanged(url, norm):
+        continue
+
+    blocks = segment(norm)
+    chunks = build_chunks(blocks, size=650, overlap=100)
+    chunks = enrich_metadata(chunks, url=url)
+    changed_chunks = diff_against_active(chunks)
+
+    # Stage E
+    model = SentenceTransformer("BAAI/bge-large-en-v1.5")
+    vectors = model.encode([c.text for c in changed_chunks],
+                           batch_size=32, normalize_embeddings=True)
+    save_embedding_records(changed_chunks, vectors)
+
+    # Stage F — Chroma Cloud upsert
+    client = chromadb.CloudClient(
+        tenant=os.environ["CHROMA_TENANT"],
+        database=os.environ["CHROMA_DATABASE"],
+        api_key=os.environ["CHROMA_API_KEY"],
+    )
+    collection = client.get_or_create_collection("mutual_fund_chunks")
+    collection.upsert(
+        ids=[r["chunk_id"] for r in new_embedding_records],
+        embeddings=[r["embedding_vector"] for r in new_embedding_records],
+        documents=[r["text"] for r in new_embedding_records],
+        metadatas=[{k: r[k] for k in ("source_url", "scheme_name", "section_name",
+                    "field_type", "crawl_date", "content_hash",
+                    "embedding_model", "embedded_at")}
+                   for r in new_embedding_records],
+    )
+
+validate_collection(collection)   # 3-probe sanity retrieval
+
+16) Non-Functional Targets
+
+- Daily pipeline completion under 10 minutes for 7 URLs
+- Incremental run should re-embed only changed pages
+- Retrieval precision improvement for numeric fact queries versus naive fixed-split baseline
+- Full audit trail for every chunk version and source mapping
+
+This design provides a practical, production-oriented chunking and embedding architecture optimized for factual mutual fund Q&A with strict citation traceability.
+Model pinned: BAAI/bge-large-en-v1.5 | Library: sentence-transformers | Dim: 1024 | Vector store: Chroma Cloud (https://www.trychroma.com)

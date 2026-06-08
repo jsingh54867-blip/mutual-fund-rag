@@ -1,0 +1,94 @@
+{
+  "source_url": "https://groww.in/mutual-funds/motilal-oswal-gold-and-silver-passive-fof-direct-growth",
+  "scheme_name": "Motilal Oswal Gold and Silver Passive FoF Direct Growth",
+  "crawl_date": "2026-04-17T14:18:18.903844+00:00",
+  "page_hash": "fe7d92d3d0da5c3c60a1e7853ae23ef8caae5dfadec8aab560d30b51f40fdd11",
+  "segmented_at": "2026-04-17T14:18:21.391179+00:00",
+  "segment_count": 11,
+  "block_summary": {
+    "header_block": 1,
+    "facts_block": 2,
+    "other_block": 2,
+    "fees_block": 3,
+    "process_block": 3
+  },
+  "segments": [
+    {
+      "block_type": "header_block",
+      "text": "Motilal Oswal Gold and Silver Passive FoF Direct Growth",
+      "line_count": 1,
+      "char_count": 55,
+      "content_hash": "7bf0532809eaa2349c6f3171aed4efa8054c6b4353ef228762143697b7a85d3b"
+    },
+    {
+      "block_type": "facts_block",
+      "text": "Historic returns\n3 months\n\u20b915,000\n\u20b914,266\n-4.89 %\n6 months\n\u20b930,000\n\u20b932,220\n+ 7.40 %\n1 year\n\u20b960,000\n\u20b980,459\n+ 34.10 %\n3 years\n\u20b91,80,000\n\u20b93,55,998\n+ 97.78 %",
+      "line_count": 17,
+      "char_count": 154,
+      "content_hash": "b5a0bb7c74dd494f9856cdf14fb27b6f6630219fb66529069b6eb6d1ef6808b6"
+    },
+    {
+      "block_type": "other_block",
+      "text": "Holdings ( 2 )\nMotilal Oswal Gold ETF-Growth\nMutual Fund\n62.48%\nMotilal Oswal Silver ETF-Growth\n37.63%",
+      "line_count": 6,
+      "char_count": 102,
+      "content_hash": "4aaaa7d7faf590f460100d803ec05a9ea47ceece5a01e2dffa4d6298b625177a"
+    },
+    {
+      "block_type": "fees_block",
+      "text": "Minimum investments",
+      "line_count": 1,
+      "char_count": 19,
+      "content_hash": "efb794e046ad2ec4c175eb6057c0e3e4d45272e880609f4425b90e4c6f83ce9e"
+    },
+    {
+      "block_type": "facts_block",
+      "text": "Average of the yearly returns of a mutual fund over a given period.\nThe total return of a mutual fund over a given period.\nReturns and rankings\nFund returns\n+28.5%\n+82.4%\n+37.7%\n+39.2%\nCategory average ( Commodities Gold )\n+42.0%\n+76.0%\n+34.1%\nRank ( Commodities Gold )\nA fee payable to a mutual fund house for managing your mutual fund investments. It is the total percentage of a company's fund assets used for administrative, management, advertising, and other expenses.",
+      "line_count": 14,
+      "char_count": 473,
+      "content_hash": "eae76ba92529b5a0241c2b375f94f5dced119b4bcfb6f09acf60bf17eb1c2663"
+    },
+    {
+      "block_type": "process_block",
+      "text": "A percentage of your capital gains payable to the government upon exiting your mutual fund investments. Taxation is categorized as long-term capital gains (LTCG) and short-term capital gains (STCG) depending on your holding period and the type of fund.",
+      "line_count": 1,
+      "char_count": 252,
+      "content_hash": "924d6b579e5259ea6837055a02b4d7df030a8c27aaf5fc98756943a17dcc987d"
+    },
+    {
+      "block_type": "fees_block",
+      "text": "A fee payable to a mutual fund house for exiting a fund (fully or partially) before the completion of a specified period from the date of investment.",
+      "line_count": 1,
+      "char_count": 149,
+      "content_hash": "88903b72337c5a22444b4013a1c581781cdf26c5d2f18a75bbf1d1cea81e6479"
+    },
+    {
+      "block_type": "process_block",
+      "text": "A form of tax payable for the purchase or sale of an asset or security.",
+      "line_count": 1,
+      "char_count": 71,
+      "content_hash": "166545d531b120bfb6a2c876bd972aa42dfe967316a96a1706bc216f38284096"
+    },
+    {
+      "block_type": "fees_block",
+      "text": "Exit Load\nExit load, stamp duty and tax\nStamp duty on investment: 0.005% (from July 1st, 2020)",
+      "line_count": 3,
+      "char_count": 94,
+      "content_hash": "e4898354ef407ec723851815958b9ad41e1dfdd239d99b957865cee870249686"
+    },
+    {
+      "block_type": "process_block",
+      "text": "Tax implication",
+      "line_count": 1,
+      "char_count": 15,
+      "content_hash": "920c0bed1fe99a75a55289011e50b2813e3333c6102e101f431beff5a7045378"
+    },
+    {
+      "block_type": "other_block",
+      "text": "Fund management\nSPM Swapnil P Mayekar Jun 2025 - Present View details\nRS Rakesh Shetty Nov 2022 - Present View details\nAbout Motilal Oswal Gold and Silver Passive FoF Direct Growth\nInvestment Objective\nFund house",
+      "line_count": 6,
+      "char_count": 212,
+      "content_hash": "e40f90750b1106671f957ed8dd21a8335bb99fe9f608bf50da42f2f7b73bf193"
+    }
+  ]
+}
