@@ -7,7 +7,13 @@ from backend.chat_service import chat
 from backend.config import SOURCE_URLS
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})
+
+_ALLOWED_ORIGINS = [
+    "https://mutualfundrag.vercel.app",
+    "https://mutual-fund-rag.onrender.com",
+]
+
+CORS(app, resources={r"/*": {"origins": _ALLOWED_ORIGINS}})
 
 
 @app.route("/", methods=["GET"])
