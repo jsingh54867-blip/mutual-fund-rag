@@ -8,11 +8,13 @@ export default defineConfig({
     outDir: 'dist',
   },
   server: {
-    port: 3000,
+    host: '0.0.0.0',
+    port: 5000,
+    allowedHosts: true,
     proxy: {
-      '/chat': 'http://localhost:5000',
-      '/health': 'http://localhost:5000',
-      '/sources': 'http://localhost:5000',
+      '/chat': 'http://localhost:8000',
+      '/health': 'http://localhost:8000',
+      '/sources': 'http://localhost:8000',
     },
   },
 })
