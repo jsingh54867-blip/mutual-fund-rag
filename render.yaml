@@ -2,7 +2,10 @@ services:
   - type: web
     name: mutual-fund-rag-api
     runtime: python
-    buildCommand: pip install -r requirements.txt
+    buildCommand: >
+      pip install -r requirements.txt &&
+      HF_HOME=/opt/render/project/src/.hf_cache
+      python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('BAAI/bge-large-en-v1.5')"
     startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120
     envVars:
       - key: CHROMA_API_KEY
@@ -17,3 +20,7 @@ services:
         value: llama-3.3-70b-versatile
       - key: PYTHON_VERSION
         value: "3.12.0"
+      - key: HF_HOME
+        value: /opt/render/project/src/.hf_cache
+      - key: SENTENCE_TRANSFORMERS_HOME
+        value: /opt/render/project/src/.hf_cache
