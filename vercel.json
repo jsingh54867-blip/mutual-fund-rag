@@ -1,0 +1,19 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "framework": "vite",
+  "rewrites": [
+    {
+      "source": "/chat",
+      "destination": "https://mutual-fund-rag.onrender.com/chat"
+    },
+    {
+      "source": "/health",
+      "destination": "https://mutual-fund-rag.onrender.com/health"
+    },
+    {
+      "source": "/sources",
+      "destination": "https://mutual-fund-rag.onrender.com/sources"
+    }
+  ]
+}
