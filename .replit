@@ -53,3 +53,7 @@ externalPort = 80
 [[ports]]
 localPort = 8000
 externalPort = 8000
+
+[deployment]
+deploymentTarget = "autoscale"
+run = ["bash", "-c", "pip install -r requirements.txt && gunicorn --bind=0.0.0.0:5000 --reuse-port app:app"]
