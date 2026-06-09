@@ -1,39 +1,58 @@
 import { useState, useRef, useEffect } from 'react'
+import './App.css'
 
 const API_BASE = import.meta.env.VITE_API_BASE || ''
 
-const EXAMPLE_QUERIES = [
-  'What is the expense ratio of Motilal Oswal Small Cap Fund?',
-  'What is the minimum SIP amount?',
-  'What is the exit load for Motilal Oswal Defence Index Fund?',
+const SUGGESTED_QUERIES = [
+  'What is the 3Y return of MO Midcap Fund?',
+  'Top holdings of Motilal Oswal Flexi Cap?',
+  'Current NAV of MO Large and Midcap Fund?',
 ]
 
-function BotMessage({ data }) {
-  if (data.error) {
-    return <div className="error">{data.error}</div>
-  }
+const FACTUAL_TYPES = new Set(['factual'])
+
+function TypingDots() {
   return (
-    <>
-      <div className="answer">{data.answer}</div>
-      {data.source_link && (
-        <div className="source">
-          Source:{' '}
-          <a href={data.source_link} target="_blank" rel="noopener noreferrer">
-            {data.source_link}
+    <div className="typing-dots">
+      <span /><span /><span />
+    </div>
+  )
+}
+
+function BotMessage({ data }) {
+  const isFactual = FACTUAL_TYPES.has(data.response_type)
+
+  if (data.error) {
+    return <div className="bot-answer error-text">{data.error}</div>
+  }
+
+  return (
+    <div className="bot-content">
+      <div className="bot-answer">{data.answer}</div>
+
+      {isFactual && data.source_link && (
+        <div className="bot-meta">
+          <a
+            href={data.source_link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="source-link"
+          >
+            ↗ View Source
           </a>
         </div>
       )}
-      {data.last_updated_from_sources && (
+
+      {isFactual && data.last_updated_from_sources && (
         <div className="last-updated">
-          Last updated from sources: {data.last_updated_from_sources}
+          Updated: {data.last_updated_from_sources}
         </div>
       )}
-      {data.response_type && (
-        <span className={`response-type badge-${data.response_type}`}>
-          {data.response_type}
-        </span>
+
+      {isFactual && (
+        <span className="badge-factual">FACTUAL</span>
       )}
-    </>
+    </div>
   )
 }
 
@@ -82,51 +101,87 @@ export default function App() {
     send()
   }
 
+  const isEmpty = messages.length === 0 && !loading
+
   return (
-    <div className="container">
-      <header>
-        <h1>Mutual Fund Facts Chatbot</h1>
-        <p className="subtitle">
-          Ask me factual questions about mutual funds. Facts-only. No investment advice.
-        </p>
+    <div className="app">
+      <header className="header">
+        <div className="header-inner">
+          <div className="header-left">
+            <div className="logo-placeholder">MO</div>
+            <span className="header-title">Motilal Oswal Fund Assistant</span>
+          </div>
+          <span className="header-badge">Fact-based · No Investment Advice</span>
+        </div>
       </header>
 
-      <div className="examples">
-        <span className="examples-label">Try asking:</span>
-        {EXAMPLE_QUERIES.map((ex, i) => (
-          <button key={i} className="example-btn" onClick={() => send(ex)}>
-            {ex}
-          </button>
-        ))}
-      </div>
-
-      <div className="chat-area" ref={chatRef}>
-        {messages.map((msg, i) => (
-          <div key={i} className={`message ${msg.role}`}>
-            {msg.role === 'user' ? msg.text : <BotMessage data={msg.data} />}
-          </div>
-        ))}
-        {loading && (
-          <div className="message bot">
-            <div className="loading">Thinking...</div>
+      <main className="chat-area" ref={chatRef}>
+        {isEmpty && (
+          <div className="empty-state">
+            <div className="empty-greeting">
+              What would you like to know about Motilal Oswal Funds?
+            </div>
+            <div className="suggestion-chips">
+              {SUGGESTED_QUERIES.map((q, i) => (
+                <button key={i} className="chip" onClick={() => send(q)}>
+                  {q}
+                </button>
+              ))}
+            </div>
           </div>
         )}
-      </div>
 
-      <form className="input-area" onSubmit={handleSubmit}>
-        <input
-          ref={inputRef}
-          type="text"
-          value={query}
-          onChange={e => setQuery(e.target.value)}
-          placeholder="Ask a factual question about mutual funds..."
-          autoComplete="off"
-          disabled={loading}
-        />
-        <button type="submit" disabled={loading || !query.trim()}>
-          Send
-        </button>
-      </form>
+        {messages.map((msg, i) => (
+          <div
+            key={i}
+            className={`message-row ${msg.role}`}
+          >
+            {msg.role === 'user' ? (
+              <div className="user-bubble">{msg.text}</div>
+            ) : (
+              <div className="bot-card">
+                <BotMessage data={msg.data} />
+              </div>
+            )}
+          </div>
+        ))}
+
+        {loading && (
+          <div className="message-row bot">
+            <div className="bot-card">
+              <TypingDots />
+            </div>
+          </div>
+        )}
+      </main>
+
+      <div className="input-footer">
+        <div className="disclaimer">
+          For informational purposes only. Not investment advice. Consult a SEBI-registered advisor.
+        </div>
+        <div className="input-bar">
+          <form className="input-form" onSubmit={handleSubmit}>
+            <input
+              ref={inputRef}
+              type="text"
+              className="input-field"
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+              placeholder="Ask about NAV, fund performance, holdings..."
+              autoComplete="off"
+              disabled={loading}
+            />
+            <button
+              type="submit"
+              className="send-btn"
+              disabled={loading || !query.trim()}
+              aria-label="Send"
+            >
+              ↑
+            </button>
+          </form>
+        </div>
+      </div>
     </div>
   )
 }

@@ -23,18 +23,30 @@ UNKNOWN_ANSWER = (
     "I don't know based on the available official sources."
 )
 
+OUT_OF_SCOPE_ANSWER = (
+    "I can only answer questions about Motilal Oswal Mutual Funds. "
+    "Please ask about fund performance, NAV, holdings, or related topics."
+)
+
 DEFAULT_SOURCE_URL = SOURCE_URLS[0] if SOURCE_URLS else f"https://{ALLOWED_DOMAIN}"
 
 REFUSAL_RESPONSE = {
     "answer": REFUSAL_ADVICE,
-    "source_link": DEFAULT_SOURCE_URL,
-    "last_updated_from_sources": "N/A",
+    "source_link": None,
+    "last_updated_from_sources": None,
     "response_type": "refusal",
 }
 
 UNKNOWN_RESPONSE = {
     "answer": UNKNOWN_ANSWER,
-    "source_link": DEFAULT_SOURCE_URL,
-    "last_updated_from_sources": "N/A",
+    "source_link": None,
+    "last_updated_from_sources": None,
     "response_type": "unknown",
+}
+
+OUT_OF_SCOPE_RESPONSE = {
+    "answer": OUT_OF_SCOPE_ANSWER,
+    "source_link": None,
+    "last_updated_from_sources": None,
+    "response_type": "out_of_scope",
 }

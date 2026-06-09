@@ -1,0 +1,47 @@
+Redesign the UI of this RAG chatbot for Motilal Oswal Mutual Funds.
+
+Color scheme:
+- Background: Deep navy (#0A1628)
+- Accent: Motilal Oswal orange (#FF6B00)
+- Bot message cards: Dark slate (#1A2B45)
+- White text throughout
+
+Header:
+- Logo placeholder on the left
+- Title: "Motilal Oswal Fund Assistant"
+- Small pill badge on the right: "Fact-based · No Investment Advice" in muted orange outline style
+
+Chat bubbles:
+- User messages: Rounded pill shape (border-radius: 20px), solid orange (#FF6B00), white text, aligned right
+- Bot messages: Rounded card (border-radius: 16px), dark slate (#1A2B45), white text, aligned left, subtle left border accent in orange
+- Add a soft drop shadow on bot cards for depth
+- Smooth fade-in animation when messages appear
+
+Input bar (bottom, fixed):
+- Full-width rounded rectangle input field (border-radius: 24px), dark background with a lighter border on focus
+- Placeholder: "Ask about NAV, fund performance, holdings..."
+- Send button: Circular, orange, with an upward arrow icon (↑) — same style as Claude's send button. Arrow rotates or glows subtly on hover.
+- Input bar sits inside a frosted glass container pinned to the bottom
+
+Disclaimer:
+- Slim bar just above the input: "For informational purposes only. Not investment advice. Consult a SEBI-registered advisor."
+- Muted grey text, small font, centered
+
+Empty state (before first message):
+- Centered greeting: "What would you like to know about Motilal Oswal Funds?"
+- 3 suggested question chips in rounded pill style:
+  "What is the 3Y return of MO Midcap Fund?"
+  "Top holdings of Motilal Oswal Flexi Cap?"
+  "Current NAV of MO Large and Midcap Fund?"
+- Chips in dark slate with orange text, clickable
+
+Typography:
+- Font: Inter
+- Message text: 15px, line-height 1.6
+- Clean hierarchy — no clutter
+
+Layout:
+- Single column, no sidebar
+- Fully mobile responsive
+- Max width 720px, centered on desktop
+- Subtle animated gradient or noise texture on the navy background for depth
