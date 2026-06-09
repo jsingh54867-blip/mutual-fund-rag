@@ -108,7 +108,6 @@ export default function App() {
       <header className="header">
         <div className="header-inner">
           <div className="header-left">
-            <div className="logo-placeholder">MO</div>
             <span className="header-title">Motilal Oswal Fund Assistant</span>
           </div>
           <span className="header-badge">Fact-based · No Investment Advice</span>
