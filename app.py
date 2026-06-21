@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import traceback
+
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
@@ -27,30 +29,43 @@ def root():
 
 @app.route("/chat", methods=["POST"])
 def chat_endpoint():
-    """POST /chat  -  Main chat endpoint.
-
-    Input JSON:  {"query": "...", "session_id": "..." (optional)}
-    Output JSON: {"answer": "...", "source_link": "...",
-                  "last_updated_from_sources": "...", "response_type": "..."}
     """
+    POST /chat
+
+    Input:
+    {
+        "query": "...",
+        "session_id": "..."   # optional
+    }
+
+    Output:
+    {
+        "answer": "...",
+        "source_link": "...",
+        "last_updated_from_sources": "...",
+        "response_type": "..."
+    }
+    """
+
     data = request.get_json(silent=True) or {}
     query = data.get("query", "").strip()
 
     if not query:
         return jsonify({"error": "query is required"}), 400
 
-   import traceback
+    try:
+        result = chat(query)
+        return jsonify(result)
 
-try:
-    result = chat(query)
-except Exception as exc:
-    traceback.print_exc()
+    except Exception as exc:
+        print("\n========== CHAT ERROR ==========")
+        traceback.print_exc()
+        print("================================\n")
 
-    return jsonify({
-        "error": str(exc),
-        "type": type(exc).__name__
-    }), 500
-    return jsonify(result)
+        return jsonify({
+            "error": str(exc),
+            "type": type(exc).__name__
+        }), 500
 
 
 @app.route("/health", methods=["GET"])
