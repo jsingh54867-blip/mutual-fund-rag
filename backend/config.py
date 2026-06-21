@@ -39,4 +39,8 @@ SOURCE_URLS = [
     "https://groww.in/mutual-funds/motilal-oswal-gold-and-silver-passive-fof-direct-growth",
     "https://groww.in/mutual-funds/motilal-oswal-small-cap-fund-direct-growth",
     "https://groww.in/mutual-funds/motilal-oswal-nifty-500-momentum-50-index-fund-direct-growth",
+    "https://groww.in/mutual-funds/motilal-oswal-most-focused-multicap-35-fund-direct-growth",
+    "https://groww.in/etfs/motilal-oswal-mutual-fund-motilal-oswal-nasdaq-q-etf-nq",
+    "https://groww.in/mutual-funds/motilal-oswal-gold-and-silver-passive-fof-direct-growth",
+    
 ]
