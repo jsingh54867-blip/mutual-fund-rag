@@ -1,14 +1,8 @@
 from __future__ import annotations
-
-<<<<<<< HEAD
 import traceback
-=======
 import re as _re
->>>>>>> f7cfd22 (Update application to run on Replit environment)
-
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-
 from backend.chat_service import chat
 from backend.config import SOURCE_URLS
 
@@ -23,7 +17,6 @@ _ALLOWED_ORIGINS = [
 
 CORS(app, resources={r"/*": {"origins": _ALLOWED_ORIGINS}})
 
-
 @app.route("/", methods=["GET"])
 def root():
     return jsonify({
@@ -32,77 +25,46 @@ def root():
         "endpoints": ["/chat", "/health", "/sources"],
     })
 
-
 @app.route("/chat", methods=["POST"])
 def chat_endpoint():
-    """
-    POST /chat
-
-    Input:
-    {
-        "query": "...",
-        "session_id": "..."   # optional
-    }
-
-    Output:
-    {
-        "answer": "...",
-        "source_link": "...",
-        "last_updated_from_sources": "...",
-        "response_type": "..."
-    }
-    """
-
     data = request.get_json(silent=True) or {}
     query = data.get("query", "").strip()
-
     if not query:
         return jsonify({"error": "query is required"}), 400
-
     try:
         result = chat(query)
         return jsonify(result)
-
     except Exception as exc:
         print("\n========== CHAT ERROR ==========")
         traceback.print_exc()
         print("================================\n")
-
         return jsonify({
             "error": str(exc),
             "type": type(exc).__name__
         }), 500
 
-
 @app.route("/health", methods=["GET"])
 def health():
     return jsonify({"status": "ok"})
-
 
 @app.route("/sources", methods=["GET"])
 def sources():
     return jsonify({"sources": SOURCE_URLS})
 
-
 @app.route("/debug", methods=["GET"])
 def debug():
     try:
         from backend.retriever import _get_collection
-
         c = _get_collection()
-
         return jsonify({
             "success": True,
             "collection": c.name
         })
-
     except Exception as e:
         return jsonify({
             "success": False,
             "error": str(e)
         })
 
-
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8000, debug=True)
-
