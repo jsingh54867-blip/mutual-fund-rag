@@ -7,10 +7,10 @@ from backend.chat_service import chat
 from backend.config import SOURCE_URLS
 
 app = Flask(__name__)
-
 _ALLOWED_ORIGINS = [
     "https://mutualfundrag.vercel.app",
     "https://mutual-fund-rag.onrender.com",
+    _re.compile(r"https://.*\.vercel\.app"),
     _re.compile(r"https://.*\.replit\.dev"),
     _re.compile(r"https://.*\.replit\.app"),
 ]
