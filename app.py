@@ -39,10 +39,17 @@ def chat_endpoint():
     if not query:
         return jsonify({"error": "query is required"}), 400
 
-    try:
-        result = chat(query)
-    except Exception as exc:
-        return jsonify({"error": f"Internal error: {exc}"}), 500
+   import traceback
+
+try:
+    result = chat(query)
+except Exception as exc:
+    traceback.print_exc()
+
+    return jsonify({
+        "error": str(exc),
+        "type": type(exc).__name__
+    }), 500
     return jsonify(result)
 
 
