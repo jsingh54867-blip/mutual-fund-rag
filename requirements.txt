@@ -3,7 +3,7 @@ flask
 flask-cors
 gunicorn
 openai
-chromadb
+chromadb-client
 sentence-transformers
 python-dotenv
 requests

@@ -1,6 +1,10 @@
 from __future__ import annotations
 
+<<<<<<< HEAD
 import traceback
+=======
+import re as _re
+>>>>>>> f7cfd22 (Update application to run on Replit environment)
 
 from flask import Flask, jsonify, request
 from flask_cors import CORS
@@ -13,6 +17,8 @@ app = Flask(__name__)
 _ALLOWED_ORIGINS = [
     "https://mutualfundrag.vercel.app",
     "https://mutual-fund-rag.onrender.com",
+    _re.compile(r"https://.*\.replit\.dev"),
+    _re.compile(r"https://.*\.replit\.app"),
 ]
 
 CORS(app, resources={r"/*": {"origins": _ALLOWED_ORIGINS}})
