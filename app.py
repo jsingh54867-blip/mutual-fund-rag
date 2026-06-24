@@ -65,6 +65,20 @@ def debug():
             "success": False,
             "error": str(e)
         })
+@app.route("/test", methods=["GET"])
+def test():
+    return jsonify({"working": True})
 
+
+@app.route("/test-retrieval", methods=["GET"])
+def test_retrieval():
+    from backend.retriever import retrieve
+
+    r = retrieve("What is the expense ratio?")
+
+    return jsonify({
+        "chunks": len(r.chunks),
+        "similarity": r.top_similarity
+    })
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8000, debug=True)
