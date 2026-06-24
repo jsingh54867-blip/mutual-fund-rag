@@ -61,6 +61,3 @@ run = ["bash", "-c", "pip install -r requirements.txt && gunicorn --bind=0.0.0.0
 [userenv]
 
 [userenv.shared]
-CHROMA_API_KEY = "ck-GMZd7arkPReQLyB4DmEU8RiPLFneJJExqQ1LHZSd3QP3"
-CHROMA_TENANT = "8ca698c4-fc47-424a-a3f8-b69980a919f5"
-CHROMA_DATABASE = "mutualfund"
