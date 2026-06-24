@@ -12,3 +12,4 @@ numpy
 
 # Testing
 pytest
+torch==2.2.2
