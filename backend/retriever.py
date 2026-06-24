@@ -32,11 +32,23 @@ _collection: chromadb.Collection | None = None
 # ---------------------------------------------------------------------------
 
 def _get_model() -> "_STType":
-    global _model
-    if _model is None:
-        from sentence_transformers import SentenceTransformer
-        _model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
-    return _model
+global _model
+
+```
+if _model is None:
+    print("========== LOADING MODEL ==========", flush=True)
+
+    from sentence_transformers import SentenceTransformer
+
+    _model = SentenceTransformer(
+        "sentence-transformers/all-MiniLM-L6-v2"
+    )
+
+    print("========== MODEL LOADED ==========", flush=True)
+
+return _model
+```
+
 
 
 def _get_collection() -> chromadb.Collection:
