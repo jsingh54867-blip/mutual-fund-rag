@@ -1,52 +1,18 @@
 from __future__ import annotations
 
+import json
 import re
 from dataclasses import dataclass, field
+from pathlib import Path
 
-import chromadb
-
-from .config import (
-    CHROMA_API_KEY,
-    CHROMA_COLLECTION,
-    CHROMA_DATABASE,
-    CHROMA_TENANT,
-    RERANK_TOP_N,
-    SIMILARITY_THRESHOLD,
-    TOP_K,
-)
-
-_client: chromadb.ClientAPI | None = None
-_collection: chromadb.Collection | None = None
+from .config import RERANK_TOP_N, SIMILARITY_THRESHOLD, TOP_K
 
 
-# ---------------------------------------------------------------------------
-# Lazy singletons
-# ---------------------------------------------------------------------------
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+CHUNKS_DIR = PROJECT_ROOT / "phase_1_mvp" / "data" / "chunks"
 
-def _get_collection() -> chromadb.Collection:
-    global _client, _collection
+_chunks_cache: list["RetrievedChunk"] | None = None
 
-    if _collection is None:
-        print("========== CONNECTING TO CHROMA ==========", flush=True)
-
-        _client = chromadb.CloudClient(
-            tenant=CHROMA_TENANT,
-            database=CHROMA_DATABASE,
-            api_key=CHROMA_API_KEY,
-        )
-
-        _collection = _client.get_collection(
-            name=CHROMA_COLLECTION,
-        )
-
-        print("========== CHROMA CONNECTED ==========", flush=True)
-
-    return _collection
-
-
-# ---------------------------------------------------------------------------
-# Data classes
-# ---------------------------------------------------------------------------
 
 @dataclass
 class RetrievedChunk:
@@ -68,146 +34,291 @@ class RetrievalResult:
     citation_urls: list[str] = field(default_factory=list)
 
 
-# ---------------------------------------------------------------------------
-# Query preprocessing
-# ---------------------------------------------------------------------------
-
 _SYNONYMS = {
     "systematic investment plan": "sip",
     "systematic investment": "sip",
     "net asset value": "nav",
     "assets under management": "aum",
     "fund size": "aum",
+    "minimum investment": "minimum sip",
 }
 
-_FIELD_TYPE_HINTS = [
+_FIELD_TYPE_HINTS: list[tuple[str, list[str]]] = [
     ("expense_ratio", ["expense ratio", "expense", "ter"]),
     ("exit_load", ["exit load", "exit", "load"]),
-    ("min_sip", ["minimum sip", "min sip", "sip amount"]),
+    ("min_sip", ["minimum sip", "min sip", "sip amount", "minimum investment"]),
     ("riskometer", ["riskometer", "risk level", "risk"]),
     ("benchmark", ["benchmark"]),
+    ("nav", ["nav", "net asset value"]),
+    ("aum", ["aum", "assets under management", "fund size"]),
+    ("holdings", ["holdings", "holding", "portfolio", "stocks"]),
+    ("returns", ["returns", "return", "performance", "1 year", "3 year", "5 year"]),
+    ("statement_process", ["capital gains", "tax statement", "statement"]),
 ]
+
+_STOP_WORDS = {
+    "a",
+    "an",
+    "and",
+    "are",
+    "about",
+    "can",
+    "do",
+    "does",
+    "for",
+    "from",
+    "give",
+    "how",
+    "i",
+    "in",
+    "is",
+    "it",
+    "me",
+    "of",
+    "on",
+    "please",
+    "tell",
+    "the",
+    "to",
+    "what",
+    "which",
+    "with",
+    "you",
+}
+
+_GENERIC_SCHEME_WORDS = {
+    "direct",
+    "fund",
+    "growth",
+    "index",
+    "motilal",
+    "oswal",
+    "plan",
+}
 
 
 def _normalize_query(query: str) -> str:
-    q = query.lower().strip()
+    normalized = query.lower().strip()
 
-    for long, short in _SYNONYMS.items():
-        q = q.replace(long, short)
+    for long_form, short_form in _SYNONYMS.items():
+        normalized = normalized.replace(long_form, short_form)
 
-    return q
+    return normalized
+
+
+def _tokens(text: str) -> set[str]:
+    words = re.findall(r"[a-z0-9]+", text.lower())
+    return {word for word in words if word not in _STOP_WORDS and len(word) > 1}
 
 
 def _infer_field_type(query: str) -> str | None:
-    q = query.lower()
+    query_lower = query.lower()
 
     for field_type, keywords in _FIELD_TYPE_HINTS:
-        for kw in keywords:
-            if kw in q:
-                return field_type
+        if any(keyword in query_lower for keyword in keywords):
+            return field_type
 
     return None
 
 
-# ---------------------------------------------------------------------------
-# Re-ranking
-# ---------------------------------------------------------------------------
+def _infer_scheme_name(query: str, known_schemes: list[str]) -> str | None:
+    query_tokens = _tokens(_normalize_query(query))
 
-def _rerank(
-    chunks: list[RetrievedChunk],
-    query: str,
-    target_field: str | None,
-) -> list[RetrievedChunk]:
+    best_scheme: str | None = None
+    best_matches = 0
 
-    q_terms = set(re.findall(r"\w+", query.lower()))
+    for scheme_name in known_schemes:
+        scheme_tokens = _tokens(scheme_name) - _GENERIC_SCHEME_WORDS
+        matches = len(query_tokens & scheme_tokens)
 
-    for chunk in chunks:
-        score = chunk.similarity
+        if matches > best_matches:
+            best_matches = matches
+            best_scheme = scheme_name
 
-        chunk_terms = set(re.findall(r"\w+", chunk.text.lower()))
+    if best_matches >= 2:
+        return best_scheme
 
-        if q_terms:
-            coverage = len(q_terms & chunk_terms) / len(q_terms)
-            score += coverage
-
-        if target_field and chunk.field_type == target_field:
-            score += 1.0
-
-        chunk.rank_score = score
-
-    chunks.sort(key=lambda x: x.rank_score, reverse=True)
-
-    return chunks
+    return None
 
 
-# ---------------------------------------------------------------------------
-# Public API
-# ---------------------------------------------------------------------------
+def _load_chunks() -> list[RetrievedChunk]:
+    global _chunks_cache
 
-def retrieve(query: str) -> RetrievalResult:
+    if _chunks_cache is not None:
+        return _chunks_cache
 
-    collection = _get_collection()
+    if not CHUNKS_DIR.exists():
+        raise RuntimeError(
+            f"Chunk folder not found: {CHUNKS_DIR}. "
+            "Make sure phase_1_mvp/data/chunks is committed to GitHub."
+        )
 
-    normalized = _normalize_query(query)
-    target_field = _infer_field_type(query)
+    chunk_files = sorted(CHUNKS_DIR.glob("*.jsonl"))
 
-    print("========== QUERYING CHROMA ==========", flush=True)
-
-    results = collection.query(
-        query_texts=[normalized],
-        n_results=TOP_K,
-        include=["documents", "metadatas", "distances"],
-    )
+    if not chunk_files:
+        raise RuntimeError(
+            f"No JSONL chunk files found in {CHUNKS_DIR}. "
+            "Make sure the chunk data is committed to GitHub."
+        )
 
     chunks: list[RetrievedChunk] = []
 
-    docs = results.get("documents", [[]])[0]
-    metas = results.get("metadatas", [[]])[0]
-    dists = results.get("distances", [[]])[0]
+    for file_path in chunk_files:
+        for line_number, line in enumerate(
+            file_path.read_text(encoding="utf-8").splitlines(),
+            start=1,
+        ):
+            if not line.strip():
+                continue
 
-    for doc, meta, dist in zip(docs, metas, dists):
+            try:
+                record = json.loads(line)
+            except json.JSONDecodeError:
+                continue
 
-        similarity = 1.0 - float(dist)
+            text = str(
+                record.get("text")
+                or record.get("chunk_text")
+                or record.get("content")
+                or ""
+            ).strip()
 
-        chunks.append(
-            RetrievedChunk(
-                chunk_id=meta.get("content_hash", ""),
-                text=doc,
-                source_url=meta.get("source_url", ""),
-                scheme_name=meta.get("scheme_name", ""),
-                section_name=meta.get("section_name", ""),
-                field_type=meta.get("field_type", ""),
-                crawl_date=meta.get("crawl_date", ""),
-                similarity=similarity,
+            if not text:
+                continue
+
+            field_type = str(record.get("field_type") or "").strip()
+
+            if not field_type:
+                field_types = record.get("field_types", [])
+
+                if isinstance(field_types, list) and field_types:
+                    field_type = str(field_types[0])
+
+                elif isinstance(field_types, str):
+                    field_type = field_types
+
+                else:
+                    field_type = "other"
+
+            chunks.append(
+                RetrievedChunk(
+                    chunk_id=str(
+                        record.get("chunk_id")
+                        or record.get("content_hash")
+                        or f"{file_path.stem}-{line_number}"
+                    ),
+                    text=text,
+                    source_url=str(record.get("source_url") or ""),
+                    scheme_name=str(record.get("scheme_name") or file_path.stem),
+                    section_name=str(record.get("section_name") or ""),
+                    field_type=field_type,
+                    crawl_date=str(record.get("crawl_date") or ""),
+                    similarity=0.0,
+                )
             )
-        )
 
-    chunks = _rerank(
-        chunks=chunks,
-        query=query,
-        target_field=target_field,
+    if not chunks:
+        raise RuntimeError("Chunk files were found, but no readable chunks were loaded.")
+
+    _chunks_cache = chunks
+    return chunks
+
+
+def _score_chunk(
+    chunk: RetrievedChunk,
+    query_terms: set[str],
+    target_field: str | None,
+    target_scheme: str | None,
+) -> float:
+    searchable_text = " ".join(
+        [
+            chunk.scheme_name,
+            chunk.section_name,
+            chunk.field_type,
+            chunk.text,
+        ]
     )
 
-    top_chunks = chunks[:RERANK_TOP_N]
+    chunk_terms = _tokens(searchable_text)
+
+    coverage = 0.0
+
+    if query_terms:
+        coverage = len(query_terms & chunk_terms) / len(query_terms)
+
+    score = coverage * 0.60
+
+    if target_field and chunk.field_type == target_field:
+        score += 0.55
+
+    if target_field and target_field.replace("_", " ") in searchable_text.lower():
+        score += 0.10
+
+    if target_scheme and chunk.scheme_name.lower() == target_scheme.lower():
+        score += 0.55
+
+    if target_scheme:
+        scheme_terms = _tokens(target_scheme) - _GENERIC_SCHEME_WORDS
+
+        if scheme_terms and scheme_terms.issubset(_tokens(chunk.scheme_name)):
+            score += 0.15
+
+    return min(score, 1.0)
+
+
+def retrieve(query: str) -> RetrievalResult:
+    all_chunks = _load_chunks()
+
+    normalized_query = _normalize_query(query)
+    query_terms = _tokens(normalized_query)
+    target_field = _infer_field_type(normalized_query)
+
+    known_schemes = list(
+        {
+            chunk.scheme_name
+            for chunk in all_chunks
+            if chunk.scheme_name
+        }
+    )
+
+    target_scheme = _infer_scheme_name(normalized_query, known_schemes)
+
+    ranked_chunks: list[RetrievedChunk] = []
+
+    for chunk in all_chunks:
+        score = _score_chunk(
+            chunk=chunk,
+            query_terms=query_terms,
+            target_field=target_field,
+            target_scheme=target_scheme,
+        )
+
+        if score <= 0:
+            continue
+
+        chunk.similarity = score
+        chunk.rank_score = score
+        ranked_chunks.append(chunk)
+
+    ranked_chunks.sort(key=lambda item: item.rank_score, reverse=True)
+
+    candidate_chunks = ranked_chunks[:TOP_K]
 
     top_chunks = [
-        c for c in top_chunks
-        if c.similarity >= SIMILARITY_THRESHOLD
+        chunk
+        for chunk in candidate_chunks[:RERANK_TOP_N]
+        if chunk.similarity >= SIMILARITY_THRESHOLD
     ]
 
     citation_urls: list[str] = []
-    seen: set[str] = set()
+    seen_urls: set[str] = set()
 
     for chunk in top_chunks:
-        if chunk.source_url and chunk.source_url not in seen:
-            seen.add(chunk.source_url)
+        if chunk.source_url and chunk.source_url not in seen_urls:
+            seen_urls.add(chunk.source_url)
             citation_urls.append(chunk.source_url)
 
-    top_similarity = (
-        top_chunks[0].similarity
-        if top_chunks
-        else 0.0
-    )
+    top_similarity = top_chunks[0].similarity if top_chunks else 0.0
 
     return RetrievalResult(
         chunks=top_chunks,
