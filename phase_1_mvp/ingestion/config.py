@@ -66,7 +66,7 @@ EMBED_LOG_PATH = LOGS_DIR / "embedding_run_log.jsonl"
 # Set CHROMA_API_KEY, CHROMA_TENANT, CHROMA_DATABASE in Replit Secrets.
 import os as _os
 
-CHROMA_COLLECTION = "mutual_fund_chunks"
+CHROMA_COLLECTION = "mutual_fund_chunks_v2"
 CHROMA_API_KEY  = _os.environ.get("CHROMA_API_KEY", "")
 CHROMA_TENANT   = _os.environ.get("CHROMA_TENANT", "")
 CHROMA_DATABASE = _os.environ.get("CHROMA_DATABASE", "")
