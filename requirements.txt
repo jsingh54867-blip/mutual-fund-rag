@@ -4,7 +4,6 @@ flask-cors
 gunicorn
 openai
 chromadb-client
-sentence-transformers
 python-dotenv
 requests
 beautifulsoup4
