@@ -1,13 +1,14 @@
 from __future__ import annotations
 
-import traceback
 import re as _re
+import traceback
 
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
 from backend.chat_service import chat
 from backend.config import SOURCE_URLS
+
 
 app = Flask(__name__)
 
@@ -24,11 +25,21 @@ CORS(app, resources={r"/*": {"origins": _ALLOWED_ORIGINS}})
 
 @app.route("/", methods=["GET"])
 def root():
-    return jsonify({
-        "service": "Mutual Fund RAG API",
-        "status": "ok",
-        "endpoints": ["/chat", "/health", "/sources", "/debug", "/test", "/test-retrieval"],
-    })
+    return jsonify(
+        {
+            "service": "Mutual Fund RAG API",
+            "status": "ok",
+            "retrieval": "local-json",
+            "endpoints": [
+                "/chat",
+                "/health",
+                "/sources",
+                "/debug",
+                "/test",
+                "/test-retrieval",
+            ],
+        }
+    )
 
 
 @app.route("/chat", methods=["POST"])
@@ -48,10 +59,12 @@ def chat_endpoint():
         traceback.print_exc()
         print("================================\n")
 
-        return jsonify({
-            "error": str(exc),
-            "type": type(exc).__name__
-        }), 500
+        return jsonify(
+            {
+                "error": str(exc),
+                "type": type(exc).__name__,
+            }
+        ), 500
 
 
 @app.route("/health", methods=["GET"])
@@ -67,20 +80,26 @@ def sources():
 @app.route("/debug", methods=["GET"])
 def debug():
     try:
-        from backend.retriever import _get_collection
+        from backend.retriever import _load_chunks
 
-        c = _get_collection()
+        chunks = _load_chunks()
 
-        return jsonify({
-            "success": True,
-            "collection": c.name
-        })
+        return jsonify(
+            {
+                "success": True,
+                "retrieval": "local-json",
+                "chunks_loaded": len(chunks),
+                "data_path": "phase_1_mvp/data/chunks",
+            }
+        )
 
-    except Exception as e:
-        return jsonify({
-            "success": False,
-            "error": str(e)
-        })
+    except Exception as exc:
+        return jsonify(
+            {
+                "success": False,
+                "error": str(exc),
+            }
+        ), 500
 
 
 @app.route("/test", methods=["GET"])
@@ -91,20 +110,36 @@ def test():
 @app.route("/test-retrieval", methods=["GET"])
 def test_retrieval():
     try:
-        from backend.retriever import _get_collection
+        from backend.retriever import _load_chunks, retrieve
 
-        c = _get_collection()
+        result = retrieve(
+            "What is the expense ratio of Motilal Oswal Small Cap Fund?"
+        )
 
-        return jsonify({
-            "success": True,
-            "collection": c.name
-        })
+        return jsonify(
+            {
+                "success": bool(result.chunks),
+                "retrieval": "local-json",
+                "chunks_loaded": len(_load_chunks()),
+                "top_similarity": result.top_similarity,
+                "matches": [
+                    {
+                        "scheme_name": chunk.scheme_name,
+                        "field_type": chunk.field_type,
+                        "similarity": round(chunk.similarity, 3),
+                    }
+                    for chunk in result.chunks
+                ],
+            }
+        )
 
-    except Exception as e:
-        return jsonify({
-            "success": False,
-            "error": str(e)
-        })
+    except Exception as exc:
+        return jsonify(
+            {
+                "success": False,
+                "error": str(exc),
+            }
+        ), 500
 
 
 if __name__ == "__main__":
