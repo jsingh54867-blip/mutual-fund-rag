@@ -11,7 +11,7 @@ load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 CHROMA_API_KEY = os.environ.get("CHROMA_API_KEY", "")
 CHROMA_TENANT = os.environ.get("CHROMA_TENANT", "")
 CHROMA_DATABASE = os.environ.get("CHROMA_DATABASE", "")
-CHROMA_COLLECTION = "mutual_fund_chunks"
+CHROMA_COLLECTION = "mutual_fund_chunks_v2"
 
 # -- Embedding model (must match ingestion) --
 EMBED_MODEL = "BAAI/bge-large-en-v1.5"
