@@ -52,7 +52,7 @@ CHUNK_OVERLAP = 100
 
 # Stage E: embedding model (BAAI/bge-large-en-v1.5 via sentence-transformers)
 EMBED_MODEL = "BAAI/bge-large-en-v1.5"
-EMBED_DIM = 1024
+EMBED_DIM = 384
 EMBED_BATCH_SIZE = 32
 # BGE query-time instruction prefix (applied at retrieval, not during ingestion)
 EMBED_QUERY_PREFIX = "Represent this question for searching relevant passages: "
@@ -66,7 +66,7 @@ EMBED_LOG_PATH = LOGS_DIR / "embedding_run_log.jsonl"
 # Set CHROMA_API_KEY, CHROMA_TENANT, CHROMA_DATABASE in Replit Secrets.
 import os as _os
 
-CHROMA_COLLECTION = "mutual_fund_chunks"
+CHROMA_COLLECTION = "mutual_fund_chunks_v2"
 CHROMA_API_KEY  = _os.environ.get("CHROMA_API_KEY", "")
 CHROMA_TENANT   = _os.environ.get("CHROMA_TENANT", "")
 CHROMA_DATABASE = _os.environ.get("CHROMA_DATABASE", "")
