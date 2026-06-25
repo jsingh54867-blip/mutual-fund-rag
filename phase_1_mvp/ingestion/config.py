@@ -51,8 +51,8 @@ CHUNK_MAX = 1000
 CHUNK_OVERLAP = 100
 
 # Stage E: embedding model (BAAI/bge-large-en-v1.5 via sentence-transformers)
-EMBED_MODEL = "BAAI/bge-large-en-v1.5"
-EMBED_DIM = 1024
+EMBED_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
+EMBED_DIM = 384
 EMBED_BATCH_SIZE = 32
 # BGE query-time instruction prefix (applied at retrieval, not during ingestion)
 EMBED_QUERY_PREFIX = "Represent this question for searching relevant passages: "
