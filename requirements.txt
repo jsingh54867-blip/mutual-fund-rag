@@ -3,14 +3,17 @@ flask
 flask-cors
 gunicorn
 openai
-chromadb-client
+chromadb
 python-dotenv
 requests
 beautifulsoup4
 numpy
-onnxruntime
+
+# Embeddings
+torch
+sentence-transformers
+transformers
+tokenizers
+
 # Testing
 pytest
-chromadb
-tokenizers
-transformers
