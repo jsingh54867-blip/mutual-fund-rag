@@ -3,6 +3,12 @@ from __future__ import annotations
 from .config import SIMILARITY_THRESHOLD
 from .formatter import format_response
 from .generator import generate
+from .intent_router import (
+    generate_greeting_response,
+    generate_out_of_scope_response,
+    is_greeting,
+    is_out_of_scope,
+)
 from .policy import REFUSAL_RESPONSE, UNKNOWN_RESPONSE
 from .query_classifier import (
     FACTUAL_ALLOWED,
@@ -14,7 +20,7 @@ from .retriever import retrieve
 
 
 def chat(query: str) -> dict:
-    """End-to-end chat pipeline: classify -> retrieve -> generate -> format.
+    """End-to-end chat pipeline: intent-route -> classify -> retrieve -> generate -> format.
 
     Returns a dict with keys:
       answer, source_link, last_updated_from_sources, response_type
@@ -27,6 +33,13 @@ def chat(query: str) -> dict:
             last_updated="N/A",
             response_type="unknown",
         )
+
+    # -- Intent routing (fast path, no API calls) --
+    if is_greeting(query):
+        return generate_greeting_response(query)
+
+    if is_out_of_scope(query):
+        return generate_out_of_scope_response()
 
     # -- Phase 4.6: Query Classification --
     classification = classify(query)

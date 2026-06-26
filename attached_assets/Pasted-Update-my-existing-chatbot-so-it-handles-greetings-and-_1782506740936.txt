@@ -1,0 +1,77 @@
+Update my existing chatbot so it handles greetings and irrelevant questions properly without changing the current UI, deployment setup, or main chatbot functionality.
+
+First inspect the existing codebase and identify where the user message is processed before the final AI/RAG response is generated.
+
+Add an intent-routing layer with these rules:
+
+1. Greeting / casual conversation handling
+   If the user sends greetings or casual opening messages such as:
+
+* hi, hey, hello, hii, heyy
+* good morning, good evening
+* how are you
+* what can you do
+* Hindi/Hinglish variations like “hello bhai”, “kaise ho”, “hii yaar”
+* messages with spelling mistakes, extra letters, punctuation, or emojis
+
+Then respond naturally and warmly instead of searching the knowledge base or saying the question is irrelevant.
+
+Use a response like:
+“Hey! 👋 I’m here to help you with [YOUR CHATBOT TOPIC]. Ask me anything related to it, and I’ll help you out.”
+
+For “how are you?” use:
+“I’m doing great! 😊 I’m here to help you with [YOUR CHATBOT TOPIC]. What would you like to know?”
+
+For “what can you do?” use:
+“I can help you answer questions related to [YOUR CHATBOT TOPIC], using the information available in this chatbot.”
+
+2. Relevant question handling
+   If the user asks something related to [YOUR CHATBOT TOPIC], continue using the existing chatbot/RAG/LLM logic exactly as it currently works.
+
+Do not reduce answer quality, citations, document search, or any existing relevant-answer functionality.
+
+3. Irrelevant or out-of-scope question handling
+   If the user asks something unrelated to [YOUR CHATBOT TOPIC], such as general trivia, weather, coding help, politics, personal advice, movies, jokes, random questions, or anything outside the chatbot’s intended domain, do not attempt to answer it.
+
+Reply politely and briefly with:
+“Sorry, I can only help with questions related to [YOUR CHATBOT TOPIC]. Please ask something within that area.”
+
+Do not say “I don’t know,” do not hallucinate an answer, and do not give a long refusal.
+
+4. Important implementation requirements
+
+* Detect greetings flexibly, not only through exact keyword matching.
+* Support upper/lowercase differences, typos, repeated letters, punctuation, emojis, and Hindi/Hinglish greetings.
+* Keep the response fast and avoid unnecessary API calls for simple greetings.
+* Do not show technical errors, internal prompts, or raw model responses to users.
+* Keep all existing app styling and features unchanged.
+* Add clean, maintainable helper functions such as:
+
+  * is_greeting(message)
+  * is_out_of_scope(message)
+  * generate_greeting_response(message)
+  * generate_out_of_scope_response()
+* Ensure in-scope questions still go through the existing RAG/LLM pipeline.
+* Test the following inputs after implementation:
+
+Greeting tests:
+“hey”
+“Hello”
+“hii”
+“heyyy”
+“good morning”
+“kaise ho”
+“hello bhai”
+“what can you do?”
+
+Out-of-scope tests:
+“Who is the Prime Minister of India?”
+“Tell me a joke”
+“What is the weather today?”
+“Write Python code for a calculator”
+“Recommend me a movie”
+
+Relevant-question tests:
+Use 3 real questions related to the chatbot’s existing knowledge base and confirm they still work normally.
+
+After making the changes, show me exactly which files were modified and provide the complete updated code for every modified file.
