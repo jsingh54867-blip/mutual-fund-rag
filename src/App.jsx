@@ -77,21 +77,33 @@ function BotMessage({ data }) {
   )
 }
 
+// Format ISO crawl date to a readable string e.g. "17 Apr 2026"
+function formatDate(iso) {
+  if (!iso) return null
+  try {
+    return new Date(iso).toLocaleDateString('en-IN', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    })
+  } catch {
+    return null
+  }
+}
+
 function SourcesPage() {
-  const [sources, setSources] = useState([])
+  const [funds, setFunds] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    fetch(`${API_BASE}/sources`)
+    fetch(`${API_BASE}/fund-meta`)
       .then(r => r.json())
       .then(data => {
-        // Deduplicate by URL
-        const unique = [...new Map((data.sources || []).map(u => [u, u])).values()]
-        setSources(unique)
+        setFunds(data.funds || [])
         setLoading(false)
       })
-      .catch(err => {
+      .catch(() => {
         setError('Could not load sources.')
         setLoading(false)
       })
@@ -119,24 +131,34 @@ function SourcesPage() {
 
       {!loading && !error && (
         <div className="sources-list">
-          {sources.map((url, i) => (
-            <a
-              key={url}
-              href={url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="source-card"
-            >
-              <div className="source-card-left">
-                <span className="source-index">{String(i + 1).padStart(2, '0')}</span>
-                <span className="source-name">{slugToName(url)}</span>
-              </div>
-              <div className="source-card-right">
-                <span className="source-type-badge">{fundType(url)}</span>
-                <span className="source-arrow">↗</span>
-              </div>
-            </a>
-          ))}
+          {funds.map((fund, i) => {
+            const date = formatDate(fund.crawl_date)
+            return (
+              <a
+                key={fund.source_url}
+                href={fund.source_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="source-card"
+              >
+                <div className="source-card-left">
+                  <span className="source-index">{String(i + 1).padStart(2, '0')}</span>
+                  <div className="source-card-info">
+                    <span className="source-name">
+                      {fund.scheme_name || slugToName(fund.source_url)}
+                    </span>
+                    {date && (
+                      <span className="source-crawl-date">Updated {date}</span>
+                    )}
+                  </div>
+                </div>
+                <div className="source-card-right">
+                  <span className="source-type-badge">{fundType(fund.source_url)}</span>
+                  <span className="source-arrow">↗</span>
+                </div>
+              </a>
+            )
+          })}
         </div>
       )}
 

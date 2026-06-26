@@ -521,11 +521,24 @@ body {
   opacity: 0.75;
 }
 
+.source-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
 .source-name {
   font-size: 14px;
   font-weight: 500;
   color: var(--white-80);
   line-height: 1.4;
+}
+
+.source-crawl-date {
+  font-size: 11px;
+  color: var(--white-50);
+  font-weight: 400;
 }
 
 .source-card-right {
