@@ -31,7 +31,7 @@ outputType = "console"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "python app.py"
+args = "gunicorn app:app --bind 0.0.0.0:8000 --workers 1 --timeout 120"
 waitForPort = 8000
 
 [[workflows.workflow]]
@@ -53,6 +53,10 @@ externalPort = 80
 [[ports]]
 localPort = 5001
 externalPort = 3000
+
+[[ports]]
+localPort = 8000
+externalPort = 8000
 
 [deployment]
 deploymentTarget = "autoscale"
