@@ -11,12 +11,13 @@ load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 CHROMA_API_KEY = os.environ.get("CHROMA_API_KEY", "")
 CHROMA_TENANT = os.environ.get("CHROMA_TENANT", "")
 CHROMA_DATABASE = os.environ.get("CHROMA_DATABASE", "")
-CHROMA_COLLECTION = "mutual_fund_chunks"
+CHROMA_COLLECTION = "mutual_fund_chunks_minilm_v1"
 
 # -- Embedding model (must match ingestion) --
-EMBED_MODEL = "BAAI/bge-large-en-v1.5"
-EMBED_DIM = 1024
-EMBED_QUERY_PREFIX = "Represent this question for searching relevant passages: "
+# all-MiniLM-L6-v2: 384-dim, symmetric model, no query prefix needed
+EMBED_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
+EMBED_DIM = 384
+EMBED_QUERY_PREFIX = ""  # MiniLM is symmetric — no instruction prefix
 
 # -- Groq LLM (OpenAI-compatible API) --
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")

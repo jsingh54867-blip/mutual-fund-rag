@@ -50,12 +50,13 @@ CHUNK_MIN = 350
 CHUNK_MAX = 1000
 CHUNK_OVERLAP = 100
 
-# Stage E: embedding model (BAAI/bge-large-en-v1.5 via sentence-transformers)
-EMBED_MODEL = "BAAI/bge-large-en-v1.5"
+# Stage E: embedding model (all-MiniLM-L6-v2 via sentence-transformers)
+# all-MiniLM-L6-v2: 384-dim, symmetric model, no query prefix needed
+EMBED_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 EMBED_DIM = 384
 EMBED_BATCH_SIZE = 32
-# BGE query-time instruction prefix (applied at retrieval, not during ingestion)
-EMBED_QUERY_PREFIX = "Represent this question for searching relevant passages: "
+# MiniLM is symmetric — no instruction prefix at query or ingestion time
+EMBED_QUERY_PREFIX = ""
 
 EMBEDDINGS_DIR = DATA_DIR / "embeddings"
 EMBED_STATE_PATH = STATE_DIR / "embed_state.json"
@@ -66,7 +67,7 @@ EMBED_LOG_PATH = LOGS_DIR / "embedding_run_log.jsonl"
 # Set CHROMA_API_KEY, CHROMA_TENANT, CHROMA_DATABASE in Replit Secrets.
 import os as _os
 
-CHROMA_COLLECTION = "mutual_fund_chunks_v2"
+CHROMA_COLLECTION = "mutual_fund_chunks_minilm_v1"
 CHROMA_API_KEY  = _os.environ.get("CHROMA_API_KEY", "")
 CHROMA_TENANT   = _os.environ.get("CHROMA_TENANT", "")
 CHROMA_DATABASE = _os.environ.get("CHROMA_DATABASE", "")

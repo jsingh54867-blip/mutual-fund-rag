@@ -1,0 +1,65 @@
+Fix the Render out-of-memory crash for factual RAG queries while keeping greeting handling, the Flask API, frontend, Groq generation, citations, and out-of-scope behavior unchanged.
+
+Current problem:
+
+* Greetings work because they do not call retrieval.
+* Factual questions crash Render with:
+  "Worker was sent SIGKILL! Perhaps out of memory?"
+* The current app uses BAAI/bge-large-en-v1.5 and starts Gunicorn with 2 workers.
+* The app must run reliably on a Render Free 512 MB instance.
+
+Make these changes carefully:
+
+1. Replace the current local embedding model everywhere with:
+   sentence-transformers/all-MiniLM-L6-v2
+
+2. Use one single source of truth for embedding configuration.
+   Ensure both:
+
+   * backend retrieval
+   * ingestion / embedding pipeline
+     use exactly the same model name and embedding dimension.
+
+3. Set embedding dimension to:
+   384
+
+4. Create a NEW Chroma Cloud collection:
+   mutual_fund_chunks_minilm_v1
+
+   Do not overwrite or delete the existing collection.
+
+5. Update backend retrieval to query only:
+   mutual_fund_chunks_minilm_v1
+
+6. Rebuild all embeddings from the existing chunk files using the new MiniLM model.
+   Force a full re-embedding, then upload every resulting vector to the new Chroma collection.
+
+7. Fix any inconsistency between the backend config and ingestion config.
+   The collection name, embedding model, dimension, and query encoding must match exactly across ingestion and runtime retrieval.
+
+8. Update both `render.yaml` and `Procfile` to use exactly:
+
+   gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --timeout 120
+
+9. Update the Render build command so it pre-downloads:
+   sentence-transformers/all-MiniLM-L6-v2
+
+   Do not preload BAAI/bge-large-en-v1.5 anywhere after this change.
+
+10. Keep the lazy-loaded singleton pattern for the embedding model so the model loads only once per worker.
+
+11. Test locally:
+
+* "hey" must return response_type "greeting"
+* "Tell me a joke" must return response_type "out_of_scope"
+* "What is the expense ratio of Motilal Oswal Small Cap Fund?" must return a factual response without a crash
+* "What is the exit load of Motilal Oswal Large and Midcap Fund?" must return a factual response without a crash
+
+12. At the end, give me:
+
+* every changed file
+* the exact command used to rebuild and upload embeddings
+* confirmation that the new Chroma collection contains vectors
+* the exact git commands to deploy this to Render
+
+Do not change the UI. Do not remove RAG. Do not use paid APIs. Do not only explain; make the code changes.
