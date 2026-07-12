@@ -41,7 +41,68 @@ _SYNONYMS = {
     "assets under management": "aum",
     "fund size": "aum",
     "minimum investment": "minimum sip",
+    "3y": "3 year",
+    "mo ": "motilal oswal ",
 }
+
+_SCHEME_ALIASES: list[tuple[str, str]] = [
+    (
+        "large and midcap",
+        "Motilal Oswal Large and Midcap Fund Direct Growth",
+    ),
+    (
+        "large midcap",
+        "Motilal Oswal Large and Midcap Fund Direct Growth",
+    ),
+    (
+        "large & midcap",
+        "Motilal Oswal Large and Midcap Fund Direct Growth",
+    ),
+    (
+        "bse enhanced value",
+        "Motilal Oswal BSE Enhanced Value Index Fund Direct Growth",
+    ),
+    (
+        "enhanced value",
+        "Motilal Oswal BSE Enhanced Value Index Fund Direct Growth",
+    ),
+    (
+        "gold and silver",
+        "Motilal Oswal Gold and Silver Passive FoF Direct Growth",
+    ),
+    (
+        "gold silver",
+        "Motilal Oswal Gold and Silver Passive FoF Direct Growth",
+    ),
+    (
+        "india defence",
+        "Motilal Oswal Nifty India Defence Index Fund Direct Growth",
+    ),
+    (
+        "defence",
+        "Motilal Oswal Nifty India Defence Index Fund Direct Growth",
+    ),
+    (
+        "momentum 50",
+        "Motilal Oswal Nifty 500 Momentum 50 Index Fund Direct Growth",
+    ),
+    (
+        "nifty 500 momentum",
+        "Motilal Oswal Nifty 500 Momentum 50 Index Fund Direct Growth",
+    ),
+    (
+        "small cap",
+        "Motilal Oswal Small Cap Fund Direct Growth",
+    ),
+    (
+        "midcap",
+        "Motilal Oswal Midcap Fund Direct Growth",
+    ),
+    (
+        "mid cap",
+        "Motilal Oswal Midcap Fund Direct Growth",
+    ),
+]
 
 _FIELD_TYPE_HINTS: list[tuple[str, list[str]]] = [
     ("expense_ratio", ["expense ratio", "expense", "ter"]),
@@ -106,6 +167,10 @@ def _normalize_query(query: str) -> str:
     return normalized
 
 
+def _compact(text: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "", text.lower())
+
+
 def _tokens(text: str) -> set[str]:
     words = re.findall(r"[a-z0-9]+", text.lower())
     return {word for word in words if word not in _STOP_WORDS and len(word) > 1}
@@ -123,6 +188,12 @@ def _infer_field_type(query: str) -> str | None:
 
 def _infer_scheme_name(query: str, known_schemes: list[str]) -> str | None:
     query_tokens = _tokens(_normalize_query(query))
+    normalized_query = _normalize_query(query)
+    known_scheme_set = set(known_schemes)
+
+    for alias, scheme_name in _SCHEME_ALIASES:
+        if alias in normalized_query and scheme_name in known_scheme_set:
+            return scheme_name
 
     best_scheme: str | None = None
     best_matches = 0
@@ -130,6 +201,11 @@ def _infer_scheme_name(query: str, known_schemes: list[str]) -> str | None:
     for scheme_name in known_schemes:
         scheme_tokens = _tokens(scheme_name) - _GENERIC_SCHEME_WORDS
         matches = len(query_tokens & scheme_tokens)
+        compact_scheme = _compact(scheme_name)
+        compact_query = _compact(normalized_query)
+
+        if compact_scheme and compact_scheme in compact_query:
+            return scheme_name
 
         if matches > best_matches:
             best_matches = matches
@@ -139,6 +215,62 @@ def _infer_scheme_name(query: str, known_schemes: list[str]) -> str | None:
         return best_scheme
 
     return None
+
+
+def _mentions_unmatched_scheme(query: str) -> bool:
+    normalized_query = _normalize_query(query)
+    query_terms = _tokens(normalized_query)
+
+    if not ({"motilal", "oswal"} & query_terms):
+        return False
+
+    scheme_terms = {
+        "bse",
+        "defence",
+        "enhanced",
+        "flexi",
+        "fof",
+        "gold",
+        "large",
+        "mid",
+        "midcap",
+        "momentum",
+        "nifty",
+        "passive",
+        "silver",
+        "small",
+        "value",
+    }
+
+    return bool(query_terms & scheme_terms)
+
+
+def _chunk_matches_field(chunk: RetrievedChunk, target_field: str | None) -> bool:
+    if not target_field:
+        return True
+
+    searchable_text = f"{chunk.field_type} {chunk.section_name} {chunk.text}".lower()
+
+    if chunk.field_type == target_field:
+        return True
+
+    field_markers = {
+        "nav": ["nav:"],
+        "aum": ["aum", "fund size"],
+        "expense_ratio": ["expense ratio"],
+        "exit_load": ["exit load"],
+        "min_sip": ["minimum sip", "minimum investments"],
+        "holdings": ["holdings"],
+        "returns": ["historic returns", "fund returns", "year"],
+        "benchmark": ["benchmark"],
+        "riskometer": ["riskometer", "risk level"],
+        "statement_process": ["capital gains", "tax statement", "tax implication"],
+    }
+
+    return any(
+        marker in searchable_text
+        for marker in field_markers.get(target_field, [target_field.replace("_", " ")])
+    )
 
 
 def _load_chunks() -> list[RetrievedChunk]:
@@ -230,6 +362,9 @@ def _score_chunk(
     target_field: str | None,
     target_scheme: str | None,
 ) -> float:
+    if target_scheme and chunk.scheme_name.lower() != target_scheme.lower():
+        return 0.0
+
     searchable_text = " ".join(
         [
             chunk.scheme_name,
@@ -248,22 +383,19 @@ def _score_chunk(
 
     score = coverage * 0.60
 
-    if target_field and chunk.field_type == target_field:
-        score += 0.55
-
-    if target_field and target_field.replace("_", " ") in searchable_text.lower():
-        score += 0.10
+    if target_field and _chunk_matches_field(chunk, target_field):
+        score += 0.75
 
     if target_scheme and chunk.scheme_name.lower() == target_scheme.lower():
-        score += 0.55
+        score += 1.0
 
     if target_scheme:
         scheme_terms = _tokens(target_scheme) - _GENERIC_SCHEME_WORDS
 
         if scheme_terms and scheme_terms.issubset(_tokens(chunk.scheme_name)):
-            score += 0.15
+            score += 0.25
 
-    return min(score, 1.0)
+    return score
 
 
 def retrieve(query: str) -> RetrievalResult:
@@ -282,6 +414,9 @@ def retrieve(query: str) -> RetrievalResult:
     )
 
     target_scheme = _infer_scheme_name(normalized_query, known_schemes)
+
+    if target_scheme is None and _mentions_unmatched_scheme(normalized_query):
+        return RetrievalResult()
 
     ranked_chunks: list[RetrievedChunk] = []
 
