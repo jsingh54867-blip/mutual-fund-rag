@@ -12,6 +12,33 @@ from .query_classifier import (
 )
 from .retriever import retrieve
 
+GREETING_RESPONSE = {
+    "answer": (
+        "Hello! I can help with factual information about Motilal Oswal mutual "
+        "funds, like NAV, expense ratio, AUM, holdings, and exit load."
+    ),
+    "source_link": None,
+    "last_updated_from_sources": None,
+    "response_type": "greeting",
+}
+
+_GREETING_QUERIES = {
+    "hello",
+    "hi",
+    "hey",
+    "hii",
+    "helo",
+    "good morning",
+    "good afternoon",
+    "good evening",
+    "namaste",
+}
+
+
+def _is_greeting(query: str) -> bool:
+    normalized = query.lower().strip(" .,!?\t\n")
+    return normalized in _GREETING_QUERIES
+
 
 def chat(query: str) -> dict:
     """End-to-end chat pipeline: classify -> retrieve -> generate -> format.
@@ -27,6 +54,9 @@ def chat(query: str) -> dict:
             last_updated="N/A",
             response_type="unknown",
         )
+
+    if _is_greeting(query):
+        return dict(GREETING_RESPONSE)
 
     # -- Phase 4.6: Query Classification --
     classification = classify(query)
