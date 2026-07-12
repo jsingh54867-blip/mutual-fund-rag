@@ -34,6 +34,7 @@ def root():
                 "/chat",
                 "/health",
                 "/sources",
+                "/refresh-sources",
                 "/debug",
                 "/test",
                 "/test-retrieval",
@@ -75,6 +76,37 @@ def health():
 @app.route("/sources", methods=["GET"])
 def sources():
     return jsonify({"sources": SOURCE_URLS})
+
+
+@app.route("/refresh-sources", methods=["GET", "POST"])
+def refresh_sources():
+    try:
+        from backend.retriever import clear_chunk_cache
+        from phase_1_mvp.ingestion.refresh_chunks import refresh
+
+        summary = refresh(force=True)
+        clear_chunk_cache()
+
+        return jsonify(
+            {
+                "success": True,
+                "message": "Live sources refreshed and retrieval cache cleared.",
+                "summary": summary,
+            }
+        )
+
+    except Exception as exc:
+        print("\n========== REFRESH ERROR ==========")
+        traceback.print_exc()
+        print("===================================\n")
+
+        return jsonify(
+            {
+                "success": False,
+                "error": str(exc),
+                "type": type(exc).__name__,
+            }
+        ), 500
 
 
 @app.route("/debug", methods=["GET"])

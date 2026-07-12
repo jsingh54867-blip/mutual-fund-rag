@@ -14,6 +14,11 @@ CHUNKS_DIR = PROJECT_ROOT / "phase_1_mvp" / "data" / "chunks"
 _chunks_cache: list["RetrievedChunk"] | None = None
 
 
+def clear_chunk_cache() -> None:
+    global _chunks_cache
+    _chunks_cache = None
+
+
 @dataclass
 class RetrievedChunk:
     chunk_id: str
